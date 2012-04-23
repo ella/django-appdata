@@ -1,0 +1,5 @@
+.*.swp
+*~
+*.py[co]
+.coverage
+APP_NAME.egg-info
