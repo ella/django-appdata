@@ -7,7 +7,7 @@ APP_NAME=${1:?brand.sh APP_NAME}
 cd $(dirname $(which "$0"))
 
 echo "Moving directories"
-find . -type d -not -name "brand.sh" -not -path './.git/*' | tac | grep 'APP_NAME' | while read d
+find . -type d -name '*APP_NAME*' -not -path './.git/*' | tac | while read d
 do
     echo "$d -> ${d/%APP_NAME/$APP_NAME}"
     git mv "$d" "${d/%APP_NAME/$APP_NAME}"
