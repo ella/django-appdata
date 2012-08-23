@@ -2,4 +2,4 @@
 *~
 *.py[co]
 .coverage
-APP_NAME.egg-info
+app_data.egg-info

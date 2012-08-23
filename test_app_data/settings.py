@@ -1,6 +1,6 @@
 DEBUG = True
 
-ROOT_URLCONF = 'test_APP_NAME.urls'
+ROOT_URLCONF = 'test_app_data.urls'
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
@@ -41,5 +41,5 @@ INSTALLED_APPS = (
     'django.contrib.redirects',
     'django.contrib.admin',
 
-    'APP_NAME',
+    'app_data',
 )

@@ -1,1 +1,1 @@
-APP_NAME whatever
+app_data whatever

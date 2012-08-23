@@ -12,17 +12,17 @@ f.close()
 
 options(
     setup = dict(
-    name = 'APP_NAME',
-    description = "APP_NAME",
-    url = "https://github.com/WhiskeyMedia/APP_NAME/",
+    name = 'app_data',
+    description = "app_data",
+    url = "https://github.com/WhiskeyMedia/app_data/",
     long_description = long_description,
     version = __versionstr__,
     author = "Whiskey Media",
     author_email = "monitoring@whiskeymedia.com",
-    packages = ['APP_NAME'],
+    packages = ['app_data'],
     zip_safe = False,
     include_package_data = True,
-    test_suite = 'test_APP_NAME.run_tests.run_all',
+    test_suite = 'test_app_data.run_tests.run_all',
     classifiers = [
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
