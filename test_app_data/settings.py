@@ -41,5 +41,5 @@ INSTALLED_APPS = (
     'django.contrib.redirects',
     'django.contrib.admin',
 
-    'app_data',
+    'test_app_data',
 )

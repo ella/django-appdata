@@ -2,3 +2,5 @@ nose
 coverage
 
 Django
+jsonfield>=0.8.10
+south>=0.7
