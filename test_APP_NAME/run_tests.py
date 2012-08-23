@@ -8,6 +8,7 @@ environ['DJANGO_SETTINGS_MODULE'] = 'test_APP_NAME.settings'
 
 
 def run_all(argv=None):
+    sys.exitfunc = lambda msg='Process shutting down...': sys.stderr.write(msg + '\n')
     if argv is None:
         argv = [
             'nosetests',
