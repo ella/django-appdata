@@ -14,7 +14,7 @@ options(
     setup = dict(
     name = 'app_data',
     description = "app_data",
-    url = "https://github.com/WhiskeyMedia/app_data/",
+    url = "https://github.com/ella/django-appdata/",
     long_description = long_description,
     version = __versionstr__,
     author = "Whiskey Media",
