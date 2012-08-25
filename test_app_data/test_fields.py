@@ -29,8 +29,8 @@ class TestAppData(TestCase):
 
     def test_classes_can_be_overriden_from_settings(self):
         settings.APP_DATA_CLASSES = {
-                'global': {'testing': 'test_app_data.test_base.DummyAppDataContainer'},
-                'test_app_data.publishable': {'testing': 'test_app_data.test_base.DummyAppDataContainer2'}
+                'global': {'testing': 'test_app_data.test_fields.DummyAppDataContainer'},
+                'test_app_data.publishable': {'testing': 'test_app_data.test_fields.DummyAppDataContainer2'}
             }
         # re-initialize app_registry
         app_registry._reset()
