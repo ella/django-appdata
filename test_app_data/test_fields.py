@@ -3,23 +3,18 @@ from django.conf import settings
 from nose import tools
 
 from app_data.registry import NamespaceConflict, NamespaceMissing, app_registry
+from app_data.containers import AppDataContainer
 
 from .models import Article, Publishable, Category
 from .cases import AppDataTestCase
 
-class AppDataContainer(dict):
-    pass
-
-
 class DummyAppDataContainer(AppDataContainer):
     pass
-
 
 class DummyAppDataContainer2(AppDataContainer):
     pass
 
-
-class TestAppDataField(AppDataTestCase):
+class TestAppDataContainers(AppDataTestCase):
     def test_classes_can_be_overriden_from_settings(self):
         settings.APP_DATA_CLASSES = {
                 'global': {'testing': 'test_app_data.test_fields.DummyAppDataContainer'},
