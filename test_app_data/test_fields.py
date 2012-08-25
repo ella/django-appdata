@@ -1,4 +1,3 @@
-from django.test import TestCase
 from django.conf import settings
 
 from nose import tools
@@ -6,6 +5,7 @@ from nose import tools
 from app_data.registry import NamespaceConflict, NamespaceMissing, app_registry
 
 from .models import Article, Publishable, Category
+from .cases import AppDataTestCase
 
 class AppDataContainer(dict):
     pass
@@ -19,14 +19,7 @@ class DummyAppDataContainer2(AppDataContainer):
     pass
 
 
-class TestAppData(TestCase):
-    def tearDown(self):
-        super(TestAppData, self).tearDown()
-        if hasattr(settings, 'APP_DATA_CLASSES'):
-            del settings.APP_DATA_CLASSES
-        app_registry._reset()
-        app_registry.default_class = None
-
+class TestAppDataField(AppDataTestCase):
     def test_classes_can_be_overriden_from_settings(self):
         settings.APP_DATA_CLASSES = {
                 'global': {'testing': 'test_app_data.test_fields.DummyAppDataContainer'},
