@@ -52,8 +52,9 @@ class AppDataContainerFactory(dict):
     def serialize(self):
         for key, value in self.items():
             if hasattr(value, 'serialize') and getattr(value, 'accessed', True):
-                super(AppDataContainerFactory, self).__setitem(key, value.serialize())
-        return self
+                super(AppDataContainerFactory, self).__setitem__(key, value.serialize())
+        # return a copy so that it's a fresh dict, not AppDataContainerFactory
+        return self.copy()
 
     def get(self, name, default=None):
         if name in self:
@@ -107,6 +108,7 @@ class AppDataContainer(object):
     def _form(self):
         if not hasattr(self, '_form_instance'):
             self._form_instance = self.get_form(self._data)
+            self._form_instance.is_valid()
         return self._form_instance
 
     def __setitem__(self, name, value):
@@ -120,7 +122,7 @@ class AppDataContainer(object):
     def __getitem__(self, name):
         self.accessed = True
         if name in self._form.fields and name in self._data:
-            self._attr_cache[name] = self.form.cleaned_data[name]
+            self._attr_cache[name] = self._form.cleaned_data[name]
 
         if name in self._attr_cache:
             return self._attr_cache[name]
@@ -141,7 +143,7 @@ class AppDataContainer(object):
 
     def serialize(self):
         for name, value in self._attr_cache.iteritems():
-            value = self.form.fields[name].widget._format_value(value)
+            value = self._form.fields[name].widget._format_value(value)
             self._data[name] = value
         return self._data
 

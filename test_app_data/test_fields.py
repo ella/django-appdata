@@ -1,9 +1,12 @@
+from datetime import date
+
 from django.conf import settings
+from django import forms
 
 from nose import tools
 
 from app_data.registry import NamespaceConflict, NamespaceMissing, app_registry
-from app_data.containers import AppDataContainer
+from app_data.containers import AppDataContainer, AppDataForm
 
 from .models import Article, Publishable, Category
 from .cases import AppDataTestCase
@@ -13,6 +16,34 @@ class DummyAppDataContainer(AppDataContainer):
 
 class DummyAppDataContainer2(AppDataContainer):
     pass
+
+class TestForms(AppDataTestCase):
+    def test_container_from_form(self):
+        class MyForm(AppDataForm):
+            publish_from = forms.DateField()
+        MyAppContainer = AppDataContainer.from_form(MyForm)
+        app_registry.register('myapp', MyAppContainer)
+
+        art = Article()
+        tools.assert_true(isinstance(art.app_data['myapp'], MyAppContainer))
+
+class TestSerialization(AppDataTestCase):
+    def test_dates_are_serialized_on_write(self):
+        class MyForm(AppDataForm):
+            publish_from = forms.DateField()
+        MyAppContainer = AppDataContainer.from_form(MyForm)
+        app_registry.register('myapp', MyAppContainer)
+
+        art = Article()
+        my_app_data = art.app_data['myapp']
+        my_app_data['publish_from'] = date(2012, 8, 26)
+        art.save()
+
+        art = Article.objects.get(pk=art.pk)
+        tools.assert_equals({'myapp': {'publish_from': '2012-08-26'}}, art.app_data)
+        tools.assert_equals({'publish_from': '2012-08-26'}, art.app_data.myapp._data)
+
+        tools.assert_equals(date(2012, 8, 26), art.app_data.myapp['publish_from'])
 
 class TestAppDataContainers(AppDataTestCase):
     def test_classes_can_be_overriden_from_settings(self):
