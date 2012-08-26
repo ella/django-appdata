@@ -91,10 +91,14 @@ class AppDataContainer(object):
     def from_form(cls, form_class):
         return type('FormAppDataContainer', (cls, ), {'fields': {}, 'form_class': form_class})
 
+    @property
+    def accessed(self):
+        return self._accessed
+
     def __init__(self, *args, **kwargs):
         self._data = dict(*args, **kwargs)
         self._attr_cache = {}
-        self.accessed = False
+        self._accessed = False
 
     def __eq__(self, other):
         if isinstance(other, AppDataContainer):
@@ -112,15 +116,20 @@ class AppDataContainer(object):
         return self._form_instance
 
     def __setitem__(self, name, value):
-        self.accessed = True
+        self._accessed = True
         if name in self._form.fields:
             # store the original
             self._attr_cache[name] = value
         else:
             self._data[name] = value
+    def __setattr__(self, name, value):
+        if name.startswith('_'):
+            super(AppDataContainer, self).__setattr__(name, value)
+        else:
+            self.__setitem__(name, value)
 
     def __getitem__(self, name):
-        self.accessed = True
+        self._accessed = True
         if name in self._form.fields and name in self._data:
             self._attr_cache[name] = self._form.cleaned_data[name]
 
@@ -129,8 +138,16 @@ class AppDataContainer(object):
 
         return self._data[name]
 
+    def __getattr__(self, name):
+        if name.startswith('_'):
+            raise AttributeError()
+        try:
+            return self.__getitem__(name)
+        except KeyError:
+            raise AttributeError()
+
     def __delitem__(self, name):
-        self.accessed = True
+        self._accessed = True
         if name in self._attr_cache:
             del self._attr_cache[name]
         del self._data[name]

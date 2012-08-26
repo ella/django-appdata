@@ -36,7 +36,7 @@ class TestSerialization(AppDataTestCase):
 
         art = Article()
         my_app_data = art.app_data['myapp']
-        my_app_data['publish_from'] = date(2012, 8, 26)
+        my_app_data.publish_from = date(2012, 8, 26)
         art.save()
 
         art = Article.objects.get(pk=art.pk)
@@ -44,6 +44,7 @@ class TestSerialization(AppDataTestCase):
         tools.assert_equals({'publish_from': '2012-08-26'}, art.app_data.myapp._data)
 
         tools.assert_equals(date(2012, 8, 26), art.app_data.myapp['publish_from'])
+        tools.assert_equals(date(2012, 8, 26), art.app_data.myapp.publish_from)
 
 class TestAppDataContainers(AppDataTestCase):
     def test_classes_can_be_overriden_from_settings(self):
