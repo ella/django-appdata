@@ -113,6 +113,7 @@ class AppDataContainer(object):
         if not hasattr(self, '_form_instance'):
             self._form_instance = self.get_form(self._data)
             self._form_instance.is_valid()
+            # FIXME: what to do if invalid?
         return self._form_instance
 
     def __setitem__(self, name, value):
@@ -122,6 +123,7 @@ class AppDataContainer(object):
             self._attr_cache[name] = value
         else:
             self._data[name] = value
+
     def __setattr__(self, name, value):
         if name.startswith('_'):
             super(AppDataContainer, self).__setattr__(name, value)
@@ -151,6 +153,10 @@ class AppDataContainer(object):
         if name in self._attr_cache:
             del self._attr_cache[name]
         del self._data[name]
+
+    def update(self, data):
+        for k, v in data.iteritems():
+            self[k] = v
 
     def validate(self, app_data, model_instance):
         self.serialize()
