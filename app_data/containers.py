@@ -89,7 +89,7 @@ class AppDataContainer(object):
 
     @classmethod
     def from_form(cls, form_class):
-        return type('FormAppDataContainer', (cls, ), {'fields': {}, 'form_class': form_class})
+        return type('%sAppDataContainer' % form_class.__name__, (cls, ), {'fields': {}, 'form_class': form_class})
 
     @property
     def accessed(self):
