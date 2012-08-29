@@ -166,7 +166,10 @@ class AppDataContainer(object):
 
     def serialize(self):
         for name, value in self._attr_cache.iteritems():
-            value = self._form.fields[name].widget._format_value(value)
+            f = self._form.fields[name]
+            value = f.prepare_value(value)
+            if hasattr(f.widget, '_format_value'):
+                value = f.widget._format_value(value)
             self._data[name] = value
         return self._data
 

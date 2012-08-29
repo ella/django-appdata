@@ -1,6 +1,7 @@
 from datetime import date
 
 from django import forms
+from django.forms.models import ModelChoiceField
 
 from app_data.registry import app_registry
 from app_data.containers import AppDataContainer, AppDataForm
@@ -15,19 +16,32 @@ class TestAppDataForms(AppDataTestCase):
         title = forms.CharField(max_length=100)
         publish_from = forms.DateField()
         publish_to = forms.DateField(required=False)
+        related_article = ModelChoiceField(queryset=Article.objects.all(), required=False)
 
     def setUp(self):
         super(TestAppDataForms, self).setUp()
         MyAppContainer = AppDataContainer.from_form(self.MyForm)
         app_registry.register('myapp', MyAppContainer)
+        self.data = {
+            'title': 'First!',
+            'publish_from': '2010-10-1'
+        }
+
+    def test_foreign_keys_can_be_used(self):
+        rel = Article.objects.create()
+        self.data['related_article'] = str(rel.pk)
+
+        article = Article()
+        form = article.app_data.myapp.get_form(self.data)
+        tools.assert_true(form.is_valid())
+        form.save()
+        article.save()
+        article = Article.objects.get(pk=article.pk)
+        tools.assert_equals(rel, article.app_data.myapp.related_article)
 
     def test_form_save_alters_data_on_model(self):
         article = Article()
-        data = {
-            'title': 'First!',
-            'publish_from': date(2010, 10, 1)
-        }
-        form = article.app_data.myapp.get_form(data)
+        form = article.app_data.myapp.get_form(self.data)
         tools.assert_true(form.is_valid())
         form.save()
         article.save()
@@ -36,10 +50,7 @@ class TestAppDataForms(AppDataTestCase):
 
     def test_form_with_limitted_fields_only_updates_those(self):
         article = Article()
-        data = {
-            'title': 'First!',
-        }
-        form = article.app_data.myapp.get_form(data, fields=['title',])
+        form = article.app_data.myapp.get_form(self.data, fields=['title',])
         tools.assert_true(form.is_valid())
         form.save()
 
