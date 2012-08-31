@@ -15,10 +15,29 @@ from django.core.urlresolvers import reverse
 csrf_protect_m = method_decorator(csrf_protect)
 
 class AppDataModelAdmin(ModelAdmin):
+    app_data_field = 'app_data'
+    app_data = {}
+
+    def get_app_data_forms(self, request, instance, data=None, files=None):
+        # TODO: pass in prefixes to avoid clashes with the rest of admin forms and formsets
+        forms = []
+        for key, kwargs in self.app_data.iteritems():
+            defaults = {
+                'prefix': '%s-%s' % (self.app_data_field, 'key'),
+            }
+            defaults.update(kwargs)
+            forms.append(getattr(instance, self.app_data_field)[key].get_form(data, files, **defaults))
+        return forms
+
     @csrf_protect_m
     @transaction.commit_on_success
     def add_view(self, request, form_url='', extra_context=None):
         "The 'add' admin view for this model."
+        #
+        # HACK alert!
+        # This method was copied verbatim fromdjango.contrib.admin.options.ModelAdmin
+        # only changes to the code are marked with 'ADDED' comments
+        #
         model = self.model
         opts = model._meta
 
@@ -37,6 +56,12 @@ class AppDataModelAdmin(ModelAdmin):
                 form_validated = False
                 new_object = self.model()
             prefixes = {}
+            # ADDED - construct app_data forms and validate
+            app_data_forms = self.get_app_data_forms(request, new_object, request.POST, request.FILES)
+            for f in app_data_forms:
+                if not f.is_valid():
+                    form_validated = False
+            # END ADDED
             for FormSet, inline in zip(self.get_formsets(request), inline_instances):
                 prefix = FormSet.get_default_prefix()
                 prefixes[prefix] = prefixes.get(prefix, 0) + 1
@@ -48,6 +73,10 @@ class AppDataModelAdmin(ModelAdmin):
                                   prefix=prefix, queryset=inline.queryset(request))
                 formsets.append(formset)
             if all_valid(formsets) and form_validated:
+                # ADDED - save app_data forms onto model
+                for f in app_data_forms:
+                    f.save()
+                # END ADDED
                 self.save_model(request, new_object, form, False)
                 self.save_related(request, form, formsets, False)
                 self.log_addition(request, new_object)
@@ -65,6 +94,9 @@ class AppDataModelAdmin(ModelAdmin):
                     initial[k] = initial[k].split(",")
             form = ModelForm(initial=initial)
             prefixes = {}
+            # ADDED - construct app_data forms
+            app_data_forms = self.get_app_data_forms(request, form.instance)
+            # END ADDED
             for FormSet, inline in zip(self.get_formsets(request), inline_instances):
                 prefix = FormSet.get_default_prefix()
                 prefixes[prefix] = prefixes.get(prefix, 0) + 1
@@ -98,6 +130,9 @@ class AppDataModelAdmin(ModelAdmin):
             'inline_admin_formsets': inline_admin_formsets,
             'errors': helpers.AdminErrorList(form, formsets),
             'app_label': opts.app_label,
+            # ADDED - pass forms into context
+            'app_data_forms': app_data_forms,
+            # END ADDED
 
         }
         context.update(extra_context or {})
@@ -107,6 +142,11 @@ class AppDataModelAdmin(ModelAdmin):
     @transaction.commit_on_success
     def change_view(self, request, object_id, form_url='', extra_context=None):
         "The 'change' admin view for this model."
+        #
+        # HACK alert!
+        # This method was copied verbatim fromdjango.contrib.admin.options.ModelAdmin
+        # only changes to the code are marked with 'ADDED' comments
+        #
         model = self.model
         opts = model._meta
 
@@ -135,6 +175,12 @@ class AppDataModelAdmin(ModelAdmin):
                 form_validated = False
                 new_object = obj
             prefixes = {}
+            # ADDED - construct app_data forms and validate
+            app_data_forms = self.get_app_data_forms(request, new_object, request.POST, request.FILES)
+            for f in app_data_forms:
+                if not f.is_valid():
+                    form_validated = False
+            # END ADDED
             for FormSet, inline in zip(self.get_formsets(request, new_object), inline_instances):
                 prefix = FormSet.get_default_prefix()
                 prefixes[prefix] = prefixes.get(prefix, 0) + 1
@@ -147,6 +193,10 @@ class AppDataModelAdmin(ModelAdmin):
                 formsets.append(formset)
 
             if all_valid(formsets) and form_validated:
+                # ADDED - save app_data forms onto model
+                for f in app_data_forms:
+                    f.save()
+                # END ADDED
                 self.save_model(request, new_object, form, True)
                 self.save_related(request, form, formsets, True)
                 change_message = self.construct_change_message(request, form, formsets)
@@ -156,6 +206,9 @@ class AppDataModelAdmin(ModelAdmin):
         else:
             form = ModelForm(instance=obj)
             prefixes = {}
+            # ADDED - construct app_data forms
+            app_data_forms = self.get_app_data_forms(request, form.instance)
+            # END ADDED
             for FormSet, inline in zip(self.get_formsets(request, obj), inline_instances):
                 prefix = FormSet.get_default_prefix()
                 prefixes[prefix] = prefixes.get(prefix, 0) + 1
@@ -191,6 +244,9 @@ class AppDataModelAdmin(ModelAdmin):
             'inline_admin_formsets': inline_admin_formsets,
             'errors': helpers.AdminErrorList(form, formsets),
             'app_label': opts.app_label,
+            # ADDED - pass forms into context
+            'app_data_forms': app_data_forms,
+            # END ADDED
         }
         context.update(extra_context or {})
         return self.render_change_form(request, context, change=True, obj=obj, form_url=form_url)
