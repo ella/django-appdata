@@ -33,6 +33,7 @@ class TestMultiForm(AppDataTestCase):
         }
         form = MF(data)
         tools.assert_true(form.is_valid())
+        tools.assert_equals({}, form.errors)
         art = form.save()
         tools.assert_equals(
             {
