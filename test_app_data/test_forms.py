@@ -1,8 +1,9 @@
 from datetime import date
 
 from django import forms
-from django.forms.models import ModelChoiceField
+from django.forms.models import ModelChoiceField, modelform_factory
 
+from app_data.forms import multiform_factory
 from app_data.registry import app_registry
 from app_data.containers import AppDataContainer, AppDataForm
 
@@ -10,6 +11,41 @@ from nose import tools
 
 from .cases import AppDataTestCase
 from .models import Article
+
+class TestMultiForm(AppDataTestCase):
+    class MyForm(AppDataForm):
+        title = forms.CharField(max_length=100)
+        publish_from = forms.DateField()
+        publish_to = forms.DateField(required=False)
+        related_article = ModelChoiceField(queryset=Article.objects.all(), required=False)
+
+    def setUp(self):
+        super(TestMultiForm, self).setUp()
+        MyAppContainer = AppDataContainer.from_form(self.MyForm)
+        app_registry.register('myapp', MyAppContainer)
+
+    def test_multi_form_saves_all_the_forms(self):
+        ModelForm = modelform_factory(Article)
+        MF = multiform_factory(ModelForm, myapp={})
+        data = {
+            'myapp-title': 'First',
+            'myapp-publish_from': '2010-11-12',
+        }
+        form = MF(data)
+        tools.assert_true(form.is_valid())
+        art = form.save()
+        tools.assert_equals(
+            {
+                'myapp': {
+                    'publish_from': '2010-11-12',
+                    'publish_to': None,
+                    'related_article': None,
+                    'title': u'First'
+                }
+            },
+            art.app_data
+        )
+
 
 class TestAppDataForms(AppDataTestCase):
     class MyForm(AppDataForm):
