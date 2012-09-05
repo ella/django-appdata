@@ -173,5 +173,6 @@ class AppDataContainer(object):
             self._data[name] = value
         return self._data
 
-    def get_form(self, data=None, files=None, fields=(), exclude=(), **kwargs):
-        return self.form_class(self, data, files, fields=fields, exclude=exclude, **kwargs)
+    def get_form(self, data=None, files=None, fields=(), exclude=(), form_class=None, **kwargs):
+        form_class = form_class or self.form_class
+        return form_class(self, data, files, fields=fields, exclude=exclude, **kwargs)
