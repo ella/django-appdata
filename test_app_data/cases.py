@@ -11,4 +11,3 @@ class AppDataTestCase(TestCase):
         app_registry._reset()
         app_registry.default_class = None
 
-
