@@ -1,7 +1,6 @@
 from operator import methodcaller
 
 from django.forms.forms import BoundField, NON_FIELD_ERRORS, Form
-from django.conf import settings
 
 class AppDataForm(Form):
     def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
