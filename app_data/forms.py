@@ -1,6 +1,21 @@
 from operator import methodcaller
 
-from django.forms.forms import BoundField, NON_FIELD_ERRORS
+from django.forms.forms import BoundField, NON_FIELD_ERRORS, Form
+
+class AppDataForm(Form):
+    def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
+        self.app_container = app_container
+        super(AppDataForm, self).__init__(data, files, **kwargs)
+
+        if fields or exclude:
+            for f in self.fields.keys():
+                if fields and f not in fields:
+                    del self.fields[f]
+                elif f in exclude:
+                    del self.fields[f]
+
+    def save(self):
+        self.app_container.update(self.cleaned_data)
 
 class MultiForm(object):
     def __init__(self, data=None, files=None, **kwargs):

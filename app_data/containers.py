@@ -1,9 +1,9 @@
 from copy import copy
 
-from django.forms import Form
 from django.core.exceptions import ValidationError
 
 from .registry import app_registry
+from .forms import AppDataForm
 
 class AppDataContainerFactory(dict):
     def __init__(self, model, *args, **kwargs):
@@ -69,20 +69,6 @@ class AppDataContainerFactory(dict):
 
         return default
 
-class AppDataForm(Form):
-    def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
-        self.app_container = app_container
-        super(AppDataForm, self).__init__(data, files, **kwargs)
-
-        if fields or exclude:
-            for f in self.fields.keys():
-                if fields and f not in fields:
-                    del self.fields[f]
-                elif f in exclude:
-                    del self.fields[f]
-
-    def save(self):
-        self.app_container.update(self.cleaned_data)
 
 class AppDataContainer(object):
     form_class = AppDataForm
