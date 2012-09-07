@@ -26,23 +26,17 @@ class MultiForm(object):
 
         self.app_forms = {}
 
-        for label, label_opts in self._get_form_options().iteritems():
+        for label, label_opts in self.app_form_opts.iteritems():
             self.app_forms[label] = app_container[label].get_form(data, files, prefix=label,  **label_opts)
-
-    def _get_form_options(self):
-        opts = self.app_form_opts.copy()
-        classpath = '%s.%s' % (self.__class__.__module__, self.__class__.__name__)
-        for label, label_opts in getattr(settings, 'APP_DATA_FORM_OVERRIDES', {}).get(classpath, {}):
-            if label_opts is None:
-                if label in opts:
-                    del opts[label]
-            else:
-                opts[label] = label_opts
-        return opts
 
     @classmethod
     def add_form(cls, label, form_options):
         cls.app_form_opts[label] = form_options
+
+    @classmethod
+    def remove_form(cls, label):
+        if label in cls.app_form_opts:
+            del cls.app_form_opts[label]
 
     def __getitem__(self, name):
         app = None

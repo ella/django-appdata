@@ -1,6 +1,7 @@
 from datetime import date
 
 from django import forms
+from django.conf import settings
 from django.forms.models import ModelChoiceField, modelform_factory
 
 from app_data.forms import multiform_factory
@@ -46,6 +47,44 @@ class TestMultiForm(AppDataTestCase):
             },
             art.app_data
         )
+
+    def test_form_can_be_added(self):
+        ModelForm = modelform_factory(Article)
+        MF = multiform_factory(ModelForm)
+        MF.add_form('myapp', {})
+        data = {
+            'myapp-title': 'First',
+            'myapp-publish_from': '2010-11-12',
+        }
+        form = MF(data)
+        tools.assert_true(form.is_valid())
+        tools.assert_equals({}, form.errors)
+        art = form.save()
+        tools.assert_equals(
+            {
+                'myapp': {
+                    'publish_from': '2010-11-12',
+                    'publish_to': None,
+                    'related_article': None,
+                    'title': u'First'
+                }
+            },
+            art.app_data
+        )
+
+    def test_form_can_be_removed(self):
+        ModelForm = modelform_factory(Article)
+        MF = multiform_factory(ModelForm, myapp={})
+        MF.remove_form('myapp')
+        data = {
+            'myapp-title': 'First',
+            'myapp-publish_from': '2010-11-12',
+        }
+        form = MF(data)
+        tools.assert_true(form.is_valid())
+        tools.assert_equals({}, form.errors)
+        art = form.save()
+        tools.assert_equals({}, art.app_data)
 
 
 class TestAppDataForms(AppDataTestCase):
