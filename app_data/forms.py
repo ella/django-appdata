@@ -1,6 +1,7 @@
 from operator import methodcaller
 
 from django.forms.forms import BoundField, NON_FIELD_ERRORS, Form
+from django.conf import settings
 
 class AppDataForm(Form):
     def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
@@ -24,8 +25,24 @@ class MultiForm(object):
         app_container = getattr(self.model_form.instance, self.app_data_field)
 
         self.app_forms = {}
-        for label, opts in self.app_form_opts.iteritems():
-            self.app_forms[label] = app_container[label].get_form(data, files, prefix=label,  **opts)
+
+        for label, label_opts in self._get_form_options().iteritems():
+            self.app_forms[label] = app_container[label].get_form(data, files, prefix=label,  **label_opts)
+
+    def _get_form_options(self):
+        opts = self.app_form_opts.copy()
+        classpath = '%s.%s' % (self.__class__.__module__, self.__class__.__name__)
+        for label, label_opts in getattr(settings, 'APP_DATA_FORM_OVERRIDES', {}).get(classpath, {}):
+            if label_opts is None:
+                if label in opts:
+                    del opts[label]
+            else:
+                opts[label] = label_opts
+        return opts
+
+    @classmethod
+    def add_form(cls, label, form_options):
+        cls.app_form_opts[label] = form_options
 
     def __getitem__(self, name):
         app = None
@@ -66,9 +83,9 @@ class MultiForm(object):
             f.save()
         return self.model_form.save(**kwargs)
 
-def multiform_factory(model_form, app_data_field='app_data', **form_opts):
+def multiform_factory(model_form, app_data_field='app_data', name=None, **form_opts):
+    name = name or '%sWithAppDataForm' % model_form._meta.model.__name__
     return type(
-        '%sWithAppDataForm' % model_form._meta.model.__name__,
-        (MultiForm, ),
+        name, (MultiForm, ),
         {'ModelForm': model_form, 'app_data_field': app_data_field, 'app_form_opts': form_opts}
     )
