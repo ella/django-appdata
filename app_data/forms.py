@@ -37,6 +37,7 @@ class MultiForm(object):
         if label in cls.app_form_opts:
             del cls.app_form_opts[label]
 
+    # TODO: mock other API of form like base_fields etc.
     def __getitem__(self, name):
         app = None
         if '.' in name:
