@@ -1,6 +1,5 @@
 from datetime import date
 
-from django.conf import settings
 from django import forms
 
 from nose import tools
@@ -8,7 +7,7 @@ from nose import tools
 from app_data.registry import NamespaceConflict, NamespaceMissing, app_registry
 from app_data.containers import AppDataContainer, AppDataForm
 
-from .models import Article, Publishable, Category
+from .models import Article, Publishable
 from .cases import AppDataTestCase
 
 class DummyAppDataContainer(AppDataContainer):
