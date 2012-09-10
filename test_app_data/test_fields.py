@@ -47,22 +47,6 @@ class TestSerialization(AppDataTestCase):
         tools.assert_equals(date(2012, 8, 26), art.app_data.myapp.publish_from)
 
 class TestAppDataContainers(AppDataTestCase):
-    def test_classes_can_be_overriden_from_settings(self):
-        settings.APP_DATA_CLASSES = {
-                'global': {'testing': 'test_app_data.test_fields.DummyAppDataContainer'},
-                'test_app_data.publishable': {'testing': 'test_app_data.test_fields.DummyAppDataContainer2'}
-            }
-        # re-initialize app_registry
-        app_registry._reset()
-
-        art = Article()
-        inst = Category()
-        art.app_data = {'testing': {'answer': 42}}
-        inst.app_data = {'testing': {'answer': 42}}
-
-        tools.assert_true(isinstance(art.app_data['testing'], DummyAppDataContainer2))
-        tools.assert_true(isinstance(inst.app_data['testing'], DummyAppDataContainer))
-
     def test_registered_classes_can_behave_as_attrs(self):
         app_registry.register('dummy', DummyAppDataContainer)
         art = Article()
