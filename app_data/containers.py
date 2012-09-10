@@ -70,6 +70,8 @@ class AppDataContainerFactory(dict):
         return default
 
 
+INITIAL = object()
+
 class AppDataContainer(object):
     form_class = AppDataForm
 
@@ -139,6 +141,14 @@ class AppDataContainer(object):
         if name in self._attr_cache:
             del self._attr_cache[name]
         del self._data[name]
+
+    def get(self, name, default=INITIAL):
+        try:
+            return self[name]
+        except KeyError:
+            if default is INITIAL and name in self._form.fields:
+                return self._form.fields[name].initial
+            return default
 
     def update(self, data):
         for k, v in data.iteritems():
