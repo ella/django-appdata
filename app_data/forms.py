@@ -1,6 +1,7 @@
 from operator import methodcaller
 
 from django.forms.forms import BoundField, NON_FIELD_ERRORS, Form
+from django.forms.widgets import media_property
 
 class AppDataForm(Form):
     def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
@@ -17,6 +18,27 @@ class AppDataForm(Form):
     def save(self):
         self.app_container.update(self.cleaned_data)
 
+class BaseFieldsDescriptor(object):
+    def __get__(self, instance, owner):
+        app_container = getattr(owner.ModelForm._meta.model(), owner.app_data_field)
+
+        if not hasattr(self, '_base_fields'):
+            self._base_fields = bf = {}
+            bf.update(owner.ModelForm.base_fields)
+            for label, opts in owner.get_app_form_opts().iteritems():
+                Form = app_container[label].form_class
+                exclude = set(opts.get('exclude', ()))
+                fields = opts.get('fields', None)
+                for name, field in Form.base_fields.iteritems():
+                    if fields is not None and name not in fields:
+                        continue
+                    if name in exclude:
+                        continue
+                    bf['%s.%s' % (label, name)] = field
+
+        return self._base_fields
+
+
 class MultiForm(object):
     app_data_field = 'app_data'
     app_form_opts = {}
@@ -30,6 +52,20 @@ class MultiForm(object):
         self.app_forms = {}
         for label, label_opts in self.get_app_form_opts().iteritems():
             self.app_forms[label] = app_container[label].get_form(data, files, prefix=label, **label_opts)
+
+    base_fields = BaseFieldsDescriptor()
+
+    @property
+    def media(self):
+        return self.model_form.media
+
+    @property
+    def save_m2m(self):
+        return self.model_form.save_m2m
+
+    @property
+    def is_bound(self):
+        return self.model_form.is_bound
 
     @classmethod
     def get_app_form_opts(cls):
@@ -75,7 +111,7 @@ class MultiForm(object):
         # provide access to app.field as well
         app = None
         if '.' in name:
-            app, field = name.split('.', 1)
+            app, name = name.split('.', 1)
 
         if app is None:
             form = self.model_form
@@ -86,11 +122,11 @@ class MultiForm(object):
                 raise KeyError('AppForm %r not found in MultiForm.' % name)
 
         try:
-            field = form[field]
+            field = form[name]
         except KeyError:
-            raise KeyError('Field %r not found in Form %s' % (name, form))
+            raise KeyError('Field %r not found in Form %s' % (name, form.fields))
 
-        return BoundField(form, field, name)
+        return field
 
     def is_valid(self):
         return self.model_form.is_valid() and all(map(methodcaller('is_valid'), self.app_forms.itervalues()))
