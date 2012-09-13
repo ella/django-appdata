@@ -4,7 +4,7 @@ from django import forms
 from django.conf import settings
 from django.forms.models import ModelChoiceField, modelform_factory
 
-from app_data.forms import multiform_factory
+from app_data.forms import multiform_factory, MultiForm
 from app_data.registry import app_registry
 from app_data.containers import AppDataContainer, AppDataForm
 
@@ -14,6 +14,9 @@ from .cases import AppDataTestCase
 from .models import Article
 
 class TestMultiForm(AppDataTestCase):
+    class MyMultiForm(MultiForm):
+        pass
+
     class MyForm(AppDataForm):
         title = forms.CharField(max_length=100)
         publish_from = forms.DateField()
@@ -28,6 +31,30 @@ class TestMultiForm(AppDataTestCase):
     def test_multi_form_saves_all_the_forms(self):
         ModelForm = modelform_factory(Article)
         MF = multiform_factory(ModelForm, myapp={})
+        data = {
+            'myapp-title': 'First',
+            'myapp-publish_from': '2010-11-12',
+        }
+        form = MF(data)
+        tools.assert_true(form.is_valid())
+        tools.assert_equals({}, form.errors)
+        art = form.save()
+        tools.assert_equals(
+            {
+                'myapp': {
+                    'publish_from': '2010-11-12',
+                    'publish_to': None,
+                    'related_article': None,
+                    'title': u'First'
+                }
+            },
+            art.app_data
+        )
+
+    def test_form_can_be_added_to_parent(self):
+        ModelForm = modelform_factory(Article)
+        MF = multiform_factory(ModelForm, base_class=self.MyMultiForm)
+        self.MyMultiForm.add_form('myapp', {})
         data = {
             'myapp-title': 'First',
             'myapp-publish_from': '2010-11-12',

@@ -18,6 +18,8 @@ class AppDataForm(Form):
         self.app_container.update(self.cleaned_data)
 
 class MultiForm(object):
+    app_data_field = 'app_data'
+    app_form_opts = {}
     def __init__(self, *args, **kwargs):
         self.model_form = self.ModelForm(*args, **kwargs)
         data = self.model_form.data
@@ -27,17 +29,35 @@ class MultiForm(object):
 
         self.app_forms = {}
 
-        for label, label_opts in self.app_form_opts.iteritems():
-            self.app_forms[label] = app_container[label].get_form(data, files, prefix=label, **label_opts)
+        # subclass may wish to remove superclass's app_form
+        skip_labels = set()
+
+        # go through class hierarchy and collect form definitions
+        for cls in self.__class__.mro():
+            # not a MultiForm, skip
+            if not hasattr(cls, 'app_form_opts'):
+                continue
+            for label, label_opts in cls.app_form_opts.iteritems():
+                if label in self.app_forms or label in skip_labels:
+                    # form already defined, or should be skipped
+                    continue
+
+                elif label_opts is None:
+                    # mark as to-be-skipped
+                    skip_labels.add(label)
+
+                else:
+                    # add form def
+                    self.app_forms[label] = app_container[label].get_form(data, files, prefix=label, **label_opts)
+
 
     @classmethod
-    def add_form(cls, label, form_options):
-        cls.app_form_opts[label] = form_options
+    def add_form(cls, label, form_options={}):
+        cls.app_form_opts[label] = form_options.copy()
 
     @classmethod
     def remove_form(cls, label):
-        if label in cls.app_form_opts:
-            del cls.app_form_opts[label]
+        cls.app_form_opts[label] = None
 
     # TODO: mock other API of form like base_fields etc.
     def __getitem__(self, name):
@@ -84,9 +104,9 @@ class MultiForm(object):
         # save the model itself
         return self.model_form.save(**kwargs)
 
-def multiform_factory(model_form, app_data_field='app_data', name=None, **form_opts):
+def multiform_factory(model_form, base_class=MultiForm, app_data_field='app_data', name=None, **form_opts):
     name = name or '%sWithAppDataForm' % model_form._meta.model.__name__
     return type(
-        name, (MultiForm, ),
+        name, (base_class, ),
         {'ModelForm': model_form, 'app_data_field': app_data_field, 'app_form_opts': form_opts}
     )
