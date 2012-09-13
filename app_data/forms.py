@@ -53,10 +53,15 @@ class MultiForm(object):
 
     @classmethod
     def add_form(cls, label, form_options={}):
+        " Add an app_data form to the multi form after it's creation. "
         cls.app_form_opts[label] = form_options.copy()
 
     @classmethod
     def remove_form(cls, label):
+        """
+        Remove an app_data form to the multi form after it's creation.
+        Even if this form would be specified in a superclass it would be skipped.
+        """
         cls.app_form_opts[label] = None
 
     # TODO: mock other API of form like base_fields etc.
