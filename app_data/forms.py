@@ -1,7 +1,6 @@
 from operator import methodcaller
 
-from django.forms.forms import BoundField, NON_FIELD_ERRORS, Form
-from django.forms.widgets import media_property
+from django.forms.forms import NON_FIELD_ERRORS, Form
 
 class AppDataForm(Form):
     def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
@@ -19,21 +18,30 @@ class AppDataForm(Form):
         self.app_container.update(self.cleaned_data)
 
 class BaseFieldsDescriptor(object):
+    " Combines the base_fiels and prefixes them properly. Descriptor because needed on class level. "
     def __get__(self, instance, owner):
-        app_container = getattr(owner.ModelForm._meta.model(), owner.app_data_field)
 
         if not hasattr(self, '_base_fields'):
             self._base_fields = bf = {}
+
+            # construct an empty model to get to the data container and thus to the form classes
+            app_container = getattr(owner.ModelForm._meta.model(), owner.app_data_field)
+
+            # all the fields form model_form
             bf.update(owner.ModelForm.base_fields)
+
+            # go through all the app forms...
             for label, opts in owner.get_app_form_opts().iteritems():
                 Form = app_container[label].form_class
                 exclude = set(opts.get('exclude', ()))
                 fields = opts.get('fields', None)
                 for name, field in Form.base_fields.iteritems():
+                    # skip proper fields
                     if fields is not None and name not in fields:
                         continue
                     if name in exclude:
                         continue
+                    # prefix the fields
                     bf['%s.%s' % (label, name)] = field
 
         return self._base_fields
@@ -42,33 +50,22 @@ class BaseFieldsDescriptor(object):
 class MultiForm(object):
     app_data_field = 'app_data'
     app_form_opts = {}
+
     def __init__(self, *args, **kwargs):
+        # construct the main model form
         self.model_form = self.ModelForm(*args, **kwargs)
         data = self.model_form.data
         files = self.model_form.files
 
-        app_container = getattr(self.model_form.instance, self.app_data_field)
-
+        # construct all the app forms
         self.app_forms = {}
+        app_container = getattr(self.model_form.instance, self.app_data_field)
         for label, label_opts in self.get_app_form_opts().iteritems():
             self.app_forms[label] = app_container[label].get_form(data, files, prefix=label, **label_opts)
 
-    base_fields = BaseFieldsDescriptor()
-
-    @property
-    def media(self):
-        return self.model_form.media
-
-    @property
-    def save_m2m(self):
-        return self.model_form.save_m2m
-
-    @property
-    def is_bound(self):
-        return self.model_form.is_bound
-
     @classmethod
     def get_app_form_opts(cls):
+        " Utility method to combinte app_form_opts from all base classes. "
         # subclass may wish to remove superclass's app_form
         skip_labels = set()
 
@@ -105,9 +102,43 @@ class MultiForm(object):
         """
         cls.app_form_opts[label] = None
 
-    # TODO: mock other API of form like base_fields etc.
-    def __getitem__(self, name):
+    # properties delegated to model_form
+    @property
+    def media(self):
+        return self.model_form.media
 
+    @property
+    def save_m2m(self):
+        return self.model_form.save_m2m
+
+    @property
+    def is_bound(self):
+        return self.model_form.is_bound
+
+    # methods combining outputs from all forms
+    base_fields = BaseFieldsDescriptor()
+
+    def _get_all_forms(self):
+        yield self.model_form
+        for f in self.app_forms.itervalues():
+            yield f
+
+    def __unicode__(self):
+        return self.as_table()
+
+    def as_ul(self):
+        return '\n'.join(map(methodcaller('as_ul'), self._get_all_forms()))
+
+    def as_table(self):
+        return '\n'.join(map(methodcaller('as_table'), self._get_all_forms()))
+
+    def as_p(self):
+        return '\n'.join(map(methodcaller('as_p'), self._get_all_forms()))
+
+    def is_valid(self):
+        return all(map(methodcaller('is_valid'), self._get_all_forms()))
+
+    def __getitem__(self, name):
         # provide access to app.field as well
         app = None
         if '.' in name:
@@ -127,9 +158,6 @@ class MultiForm(object):
             raise KeyError('Field %r not found in Form %s' % (name, form.fields))
 
         return field
-
-    def is_valid(self):
-        return self.model_form.is_valid() and all(map(methodcaller('is_valid'), self.app_forms.itervalues()))
 
     @property
     def errors(self):
