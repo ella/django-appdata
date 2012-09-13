@@ -28,17 +28,22 @@ class MultiForm(object):
         app_container = getattr(self.model_form.instance, self.app_data_field)
 
         self.app_forms = {}
+        for label, label_opts in self.get_app_form_opts().iteritems():
+            self.app_forms[label] = app_container[label].get_form(data, files, prefix=label, **label_opts)
 
+    @classmethod
+    def get_app_form_opts(cls):
         # subclass may wish to remove superclass's app_form
         skip_labels = set()
 
+        form_opts = {}
         # go through class hierarchy and collect form definitions
-        for cls in self.__class__.mro():
+        for c in cls.mro():
             # not a MultiForm, skip
-            if not hasattr(cls, 'app_form_opts'):
+            if not hasattr(c, 'app_form_opts'):
                 continue
-            for label, label_opts in cls.app_form_opts.iteritems():
-                if label in self.app_forms or label in skip_labels:
+            for label, label_opts in c.app_form_opts.iteritems():
+                if label in form_opts or label in skip_labels:
                     # form already defined, or should be skipped
                     continue
 
@@ -48,8 +53,8 @@ class MultiForm(object):
 
                 else:
                     # add form def
-                    self.app_forms[label] = app_container[label].get_form(data, files, prefix=label, **label_opts)
-
+                    form_opts[label] = label_opts
+        return form_opts
 
     @classmethod
     def add_form(cls, label, form_options={}):
