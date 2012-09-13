@@ -13,7 +13,7 @@ app_data = {
 ArticleMultiForm = multiform_factory(modelform_factory(Article), **app_data)
 
 class ArticleModelAdmin(AppDataModelAdmin):
-    multiform = ArticleMultiForm
+    form = ArticleMultiForm
 
     fieldsets = [
         (None, {'fields': ['rss.title']}),
