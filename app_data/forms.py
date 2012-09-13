@@ -39,6 +39,8 @@ class MultiForm(object):
 
     # TODO: mock other API of form like base_fields etc.
     def __getitem__(self, name):
+
+        # provide access to app.field as well
         app = None
         if '.' in name:
             app, field = name.split('.', 1)
@@ -63,6 +65,7 @@ class MultiForm(object):
 
     @property
     def errors(self):
+        # combine all the errors
         _errors = self.model_form.errors.copy()
         for label, form in self.app_forms.iteritems():
             for k, v in form.errors.iteritems():
@@ -73,8 +76,10 @@ class MultiForm(object):
         return _errors
 
     def save(self, **kwargs):
+        # save the app_data forms first
         for f in self.app_forms.values():
             f.save()
+        # save the model itself
         return self.model_form.save(**kwargs)
 
 def multiform_factory(model_form, app_data_field='app_data', name=None, **form_opts):

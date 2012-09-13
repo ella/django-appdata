@@ -81,6 +81,7 @@ class AppDataContainer(object):
 
     @property
     def accessed(self):
+        " Return a boolean indicating whether the data have been accessed. "
         return self._accessed
 
     def __init__(self, *args, **kwargs):
@@ -98,6 +99,7 @@ class AppDataContainer(object):
 
     @property
     def _form(self):
+        " Form instance used to clean/(de)serialize field values. "
         if not hasattr(self, '_form_instance'):
             self._form_instance = self.get_form(self._data)
             self._form_instance.is_valid()
@@ -106,13 +108,16 @@ class AppDataContainer(object):
 
     def __setitem__(self, name, value):
         self._accessed = True
+        # if dealing with defined field...
         if name in self._form.fields:
-            # store the original
+            # ..store the original - do not serialize, do not store in _data
             self._attr_cache[name] = value
         else:
+            # fallback to behaving as normal dict otherwise
             self._data[name] = value
 
     def __setattr__(self, name, value):
+        " Provide access to fields as attributes. "
         if name.startswith('_'):
             super(AppDataContainer, self).__setattr__(name, value)
         else:
@@ -120,15 +125,18 @@ class AppDataContainer(object):
 
     def __getitem__(self, name):
         self._accessed = True
+
+        # defined field uncleaned, retrieve from self._form
         if name in self._form.fields and name in self._data:
             self._attr_cache[name] = self._form.cleaned_data[name]
 
+        # defined field store in cache, return it
         if name in self._attr_cache:
             return self._attr_cache[name]
-
         return self._data[name]
 
     def __getattr__(self, name):
+        " Provide access to fields as attributes. "
         if name.startswith('_'):
             raise AttributeError()
         try:
@@ -143,11 +151,14 @@ class AppDataContainer(object):
         del self._data[name]
 
     def get(self, name, default=INITIAL):
+        " Mimic dict's get with the exception of returning the inital value for defined fields "
         try:
             return self[name]
         except KeyError:
             if default is INITIAL and name in self._form.fields:
                 return self._form.fields[name].initial
+            elif default is INITIAL:
+                return None
             return default
 
     def update(self, data):
@@ -161,6 +172,7 @@ class AppDataContainer(object):
             raise ValidationError(form.errors)
 
     def serialize(self):
+        " Go through attribute cache and use ._form to serialze those values into ._data. "
         for name, value in self._attr_cache.iteritems():
             f = self._form.fields[name]
             value = f.prepare_value(value)
@@ -170,5 +182,6 @@ class AppDataContainer(object):
         return self._data
 
     def get_form(self, data=None, files=None, fields=(), exclude=(), form_class=None, **kwargs):
+        " Contrsuct a form for this "
         form_class = form_class or self.form_class
         return form_class(self, data, files, fields=fields, exclude=exclude, **kwargs)
