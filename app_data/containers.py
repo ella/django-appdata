@@ -126,13 +126,14 @@ class AppDataContainer(object):
     def __getitem__(self, name):
         self._accessed = True
 
-        # defined field uncleaned, retrieve from self._form
-        if name in self._form.fields and name in self._data:
+        # defined field, still uncleaned, retrieve from self._form and put in cache
+        if name in self._form.fields and name in self._data and name not in self._attr_cache:
             self._attr_cache[name] = self._form.cleaned_data[name]
 
-        # defined field store in cache, return it
+        # defined field stored in cache, return it
         if name in self._attr_cache:
             return self._attr_cache[name]
+
         return self._data[name]
 
     def __getattr__(self, name):
