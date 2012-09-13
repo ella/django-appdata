@@ -18,15 +18,17 @@ class AppDataForm(Form):
         self.app_container.update(self.cleaned_data)
 
 class MultiForm(object):
-    def __init__(self, data=None, files=None, **kwargs):
-        self.model_form = self.ModelForm(data, files, **kwargs)
+    def __init__(self, *args, **kwargs):
+        self.model_form = self.ModelForm(*args, **kwargs)
+        data = self.model_form.data
+        files = self.model_form.files
 
         app_container = getattr(self.model_form.instance, self.app_data_field)
 
         self.app_forms = {}
 
         for label, label_opts in self.app_form_opts.iteritems():
-            self.app_forms[label] = app_container[label].get_form(data, files, prefix=label,  **label_opts)
+            self.app_forms[label] = app_container[label].get_form(data, files, prefix=label, **label_opts)
 
     @classmethod
     def add_form(cls, label, form_options):
