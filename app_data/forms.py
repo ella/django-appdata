@@ -162,7 +162,7 @@ class MultiForm(object):
     @property
     def changed_data(self):
         if not hasattr(self, '_changed_data'):
-            self._changed_data = cd = self.model_form.chaged_data[:]
+            self._changed_data = cd = self.model_form.changed_data[:]
             for label, form in self.app_forms.iteritems():
                 cd.extend(map(lambda n: '%s.%s' % (label, n), form.changed_data))
         return self._changed_data
