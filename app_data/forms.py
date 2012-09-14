@@ -54,8 +54,11 @@ class MultiForm(object):
     def __init__(self, *args, **kwargs):
         # construct the main model form
         self.model_form = self.ModelForm(*args, **kwargs)
-        data = self.model_form.data
-        files = self.model_form.files
+        if self.model_form.is_bound:
+            data = self.model_form.data
+            files = self.model_form.files
+        else:
+            data, files = None, None
 
         # construct all the app forms
         self.app_forms = {}
