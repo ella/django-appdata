@@ -142,6 +142,12 @@ class TestAppDataForms(AppDataTestCase):
         article = Article.objects.get(pk=article.pk)
         tools.assert_equals(rel, article.app_data.myapp.related_article)
 
+    def test_current_app_data_will_be_used_as_initial(self):
+        article = Article()
+        article.app_data = {'myapp': {'title': 'Hello', 'publish_from': '2012-10-10'}}
+        form = article.app_data.myapp.get_form()
+        tools.assert_equals({'title': 'Hello', 'publish_from': '2012-10-10'}, form.initial)
+
     def test_form_save_alters_data_on_model(self):
         article = Article()
         form = article.app_data.myapp.get_form(self.data)

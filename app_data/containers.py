@@ -185,4 +185,4 @@ class AppDataContainer(object):
     def get_form(self, data=None, files=None, fields=(), exclude=(), form_class=None, **kwargs):
         " Contrsuct a form for this "
         form_class = form_class or self.form_class
-        return form_class(self, data, files, fields=fields, exclude=exclude, **kwargs)
+        return form_class(self, data, files, fields=fields, exclude=exclude, initial=self.serialize(), **kwargs)
