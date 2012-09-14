@@ -160,6 +160,14 @@ class MultiForm(object):
         return field
 
     @property
+    def changed_data(self):
+        if not hasattr(self, '_changed_data'):
+            self._changed_data = cd = self.model_form.chaged_data[:]
+            for label, form in self.app_forms.iteritems():
+                cd.extend(map(lambda n: '%s.%s' % (label, n), form.changed_data))
+        return self._changed_data
+
+    @property
     def errors(self):
         # combine all the errors
         _errors = self.model_form.errors.copy()
