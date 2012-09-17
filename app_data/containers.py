@@ -127,8 +127,11 @@ class AppDataContainer(object):
         self._accessed = True
 
         # defined field, still uncleaned, retrieve from self._form and put in cache
-        if name in self._form.fields and name in self._data and name not in self._attr_cache:
-            self._attr_cache[name] = self._form.cleaned_data[name]
+        if name in self._form.fields and name not in self._attr_cache:
+            if name in self._data:
+                self._attr_cache[name] = self._form.cleaned_data[name]
+            else:
+                self._attr_cache[name] = self._form.fields[name].initial
 
         # defined field stored in cache, return it
         if name in self._attr_cache:

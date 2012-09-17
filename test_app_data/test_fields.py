@@ -36,6 +36,18 @@ class TestForms(AppDataTestCase):
         tools.assert_true(isinstance(art.app_data['myapp'], MyAppContainer))
         tools.assert_equals('Hullo!', art.app_data.myapp.get('title'))
 
+    def test_get_semantics_for_getitem(self):
+        class MyForm(AppDataForm):
+            title = forms.CharField(max_length=25, initial='Hullo!')
+            description = forms.CharField(max_length=25)
+        MyAppContainer = AppDataContainer.from_form(MyForm)
+        app_registry.register('myapp', MyAppContainer)
+
+        art = Article()
+        tools.assert_equals('Hullo!', art.app_data.myapp.title)
+        # empty initial values default to None
+        tools.assert_equals(None, art.app_data.myapp.description)
+
 
 class TestSerialization(AppDataTestCase):
     def test_dates_are_serialized_on_write(self):
