@@ -1,4 +1,7 @@
-from operator import methodcaller
+try:
+    from operator import methodcaller
+except ImportError:
+    methodcaller = lambda name: lambda o: getattr(o, name)()
 
 from django.forms.forms import NON_FIELD_ERRORS, Form
 
