@@ -162,6 +162,10 @@ class MultiForm(object):
 
         return field
 
+    def __getattr__(self, name):
+        # If attr isn't explicitly defined, fall back to looking on the form
+        return getattr(self.model_form, name)
+
     @property
     def changed_data(self):
         if not hasattr(self, '_changed_data'):

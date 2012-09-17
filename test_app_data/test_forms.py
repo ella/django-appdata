@@ -113,6 +113,18 @@ class TestMultiForm(AppDataTestCase):
         art = form.save()
         tools.assert_equals({}, art.app_data)
 
+    def test_multiform_can_access_attrs_on_form(self):
+        class AttrForm(forms.ModelForm):
+            def __init__(self, *args, **kwargs):
+                super(AttrForm, self).__init__(*args, **kwargs)
+                self.my_attr = True
+
+            class Meta:
+                model = Article
+
+        MF = multiform_factory(AttrForm)
+        form = MF()
+        tools.assert_true(form.my_attr)
 
 class TestAppDataForms(AppDataTestCase):
     class MyForm(AppDataForm):
