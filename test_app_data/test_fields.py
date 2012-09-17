@@ -79,7 +79,7 @@ class TestAppDataContainers(AppDataTestCase):
         art = Article()
         art.app_data.dummy = {'answer': 42}
         tools.assert_true(isinstance(art.app_data.dummy, DummyAppDataContainer))
-        tools.assert_equals(DummyAppDataContainer({'answer': 42}), art.app_data.dummy)
+        tools.assert_equals(DummyAppDataContainer(art, {'answer': 42}), art.app_data.dummy)
         tools.assert_equals({'dummy': {'answer': 42}}, art.app_data)
 
     def test_registered_classes_get_stored_on_access(self):

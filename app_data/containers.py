@@ -6,8 +6,9 @@ from .registry import app_registry
 from .forms import AppDataForm
 
 class AppDataContainerFactory(dict):
-    def __init__(self, model, *args, **kwargs):
-        self._model = model
+    def __init__(self, model_instance, *args, **kwargs):
+        self._model = model_instance.__class__
+        self._instance = model_instance
         self._app_registry = kwargs.pop('app_registry', app_registry)
         super(AppDataContainerFactory, self).__init__(*args, **kwargs)
 
@@ -29,11 +30,11 @@ class AppDataContainerFactory(dict):
         except KeyError:
             if class_ is None:
                 raise
-            val = class_()
+            val = class_(self._instance)
             self[name] = val
         else:
             if class_ is not None and not isinstance(val, class_):
-                val = class_(val)
+                val = class_(self._instance, val)
                 self[name] = val
 
         return val
@@ -65,7 +66,7 @@ class AppDataContainerFactory(dict):
 
         class_ = self._app_registry.get_class(name, self._model)
         if class_ is not None and not isinstance(default, class_):
-            return class_(default)
+            return class_(self._instance, default)
 
         return default
 
@@ -84,10 +85,11 @@ class AppDataContainer(object):
         " Return a boolean indicating whether the data have been accessed. "
         return self._accessed
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, model_instance, *args, **kwargs):
         self._data = dict(*args, **kwargs)
         self._attr_cache = {}
         self._accessed = False
+        self._instance = model_instance
 
     def __eq__(self, other):
         if isinstance(other, AppDataContainer):
