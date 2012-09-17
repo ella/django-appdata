@@ -129,6 +129,12 @@ class TestAppDataForms(AppDataTestCase):
             'publish_from': '2010-10-1'
         }
 
+    def test_instance_is_accessible_to_the_form(self):
+        art = Article()
+        form = art.app_data.myapp.get_form(self.data)
+
+        tools.assert_true(art is form.instance)
+
     def test_foreign_keys_can_be_used(self):
         rel = Article.objects.create()
         self.data['related_article'] = str(rel.pk)

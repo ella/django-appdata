@@ -17,6 +17,10 @@ class AppDataForm(Form):
                 elif f in exclude:
                     del self.fields[f]
 
+    @property
+    def instance(self):
+        return self.app_container._instance
+
     def save(self):
         self.app_container.update(self.cleaned_data)
 
