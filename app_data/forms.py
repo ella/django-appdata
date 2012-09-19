@@ -185,7 +185,7 @@ class MultiForm(object):
             for label, form in self.app_forms.iteritems():
                 for k, v in form.errors.iteritems():
                     if k == NON_FIELD_ERRORS:
-                        self._errors[k] = self._errors.get(k, self.model_form.error_class()).extend(v)
+                        self._errors.setdefault(k, self.model_form.error_class()).extend(v)
                     else:
                         self._errors['%s.%s' % (label, k)] = v
         return self._errors
