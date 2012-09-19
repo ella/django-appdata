@@ -24,11 +24,16 @@ class NamespaceRegistry(object):
         Get class for namespace in given model
         """
 
+        # go through the MRO looking for registered namespace to our model or it's parents
         for c in model.mro():
             if c in self._model_registry and namespace in self._model_registry[c]:
                 return self._model_registry[c][namespace]
+
+        # no namespace found for model or it's parents, try the global registry
         if namespace in self._global_registry:
             return self._global_registry[namespace]
+
+        # fallback to default
         return self.default_class
 
     def register(self, namespace, class_, model=None, override=False):
