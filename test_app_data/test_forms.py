@@ -35,6 +35,8 @@ class TestMultiForm(AppDataTestCase):
     def test_multi_form_saves_all_the_forms(self):
         ModelForm = modelform_factory(Article)
         MF = multiform_factory(ModelForm)
+        MF.add_form('myapp')
+        MF.add_form('myapp2')
         data = {
             'myapp-title': 'First',
             'myapp-publish_from': '2010-11-12',
