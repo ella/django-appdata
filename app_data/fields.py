@@ -22,6 +22,8 @@ class AppDataDescriptor(Creator):
             value = AppDataContainerFactory(instance, value)
             instance.__dict__[self.field.name] = value
 
+        value._instance = instance
+        value._model = instance.__class__
         return value
 
     def __set__(self, instance, value):

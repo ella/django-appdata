@@ -42,6 +42,12 @@ class AppDataContainerFactory(dict):
 
         return val
 
+    def __getstate__(self):
+        return self.serialize()
+
+    def __setstate__(self, state):
+        self.update(state)
+
     def validate(self, model_instance):
         errors = {}
         for key, value in self.items():
@@ -156,18 +162,6 @@ class AppDataContainer(object):
         if name in self._attr_cache:
             del self._attr_cache[name]
         del self._data[name]
-
-    def __getstate__(self):
-        return {
-            '_data': self._data,
-            '_attr_cache': self._attr_cache,
-            '_accessed': self._accessed
-        }
-
-    def __setstate__(self, state):
-        self._data = state['_data']
-        self._attr_cache = state['_attr_cache']
-        self._accessed = state['_accessed']
 
     def get(self, name, default=INITIAL):
         " Mimic dict's get with the exception of returning the inital value for defined fields "
