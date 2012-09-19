@@ -106,9 +106,7 @@ class AppDataContainer(object):
     def _form(self):
         " Form instance used to clean/(de)serialize field values. "
         if not hasattr(self, '_form_instance'):
-            self._form_instance = self.get_form(self._data)
-            self._form_instance.is_valid()
-            # FIXME: what to do if invalid?
+            self._form_instance = self.get_form()
         return self._form_instance
 
     def __setitem__(self, name, value):
@@ -134,7 +132,7 @@ class AppDataContainer(object):
         # defined field, still uncleaned, retrieve from self._form and put in cache
         if name in self._form.fields and name not in self._attr_cache:
             if name in self._data:
-                self._attr_cache[name] = self._form.cleaned_data[name]
+                self._attr_cache[name] = self._form.fields[name].clean(self._data[name])
             else:
                 self._attr_cache[name] = self._form.fields[name].initial
 
