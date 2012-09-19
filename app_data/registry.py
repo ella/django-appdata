@@ -23,13 +23,12 @@ class NamespaceRegistry(object):
         """
         Get class for namespace in given model
         """
-        for registry in (
-            # use str for models to avoid import-time mess
-            self._model_registry.get(model, {}),
-            self._global_registry
-            ):
-            if namespace in registry:
-                return registry[namespace]
+
+        for c in model.mro():
+            if c in self._model_registry and namespace in self._model_registry[c]:
+                return self._model_registry[c][namespace]
+        if namespace in self._global_registry:
+            return self._global_registry[namespace]
         return self.default_class
 
     def register(self, namespace, class_, model=None, override=False):
