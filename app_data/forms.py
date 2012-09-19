@@ -179,8 +179,8 @@ class MultiForm(object):
 
     @property
     def errors(self):
+        # combine all the errors
         if not hasattr(self, '_errors'):
-            # combine all the errors
             self._errors = self.model_form.errors.copy()
             for label, form in self.app_forms.iteritems():
                 for k, v in form.errors.iteritems():
@@ -188,7 +188,7 @@ class MultiForm(object):
                         self._errors[k] = self._errors.get(k, self.model_form.error_class()).extend(v)
                     else:
                         self._errors['%s.%s' % (label, k)] = v
-            return self._errors
+        return self._errors
 
     def non_field_errors(self):
         return self.errors.get(NON_FIELD_ERRORS, self.model_form.error_class())
