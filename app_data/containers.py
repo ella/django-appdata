@@ -14,6 +14,7 @@ class AppDataContainerFactory(dict):
 
     def __repr__(self):
         return '<AppDataContainerFactory: %s>' % super(AppDataContainerFactory, self).__repr__()
+
     def __setattr__(self, name, value):
         if name.startswith('_') or self._app_registry.get_class(name, self._model) is None:
             super(AppDataContainerFactory, self).__setattr__(name, value)
