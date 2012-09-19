@@ -2,4 +2,6 @@
 *~
 *.py[co]
 .coverage
-app_data.egg-info
+django_appdata.egg-info
+build
+dist
