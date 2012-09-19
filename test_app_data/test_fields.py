@@ -10,6 +10,11 @@ from app_data.containers import AppDataContainer, AppDataForm
 from .models import Article, Publishable
 from .cases import AppDataTestCase
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 class DummyAppDataContainer(AppDataContainer):
     pass
 
@@ -50,23 +55,33 @@ class TestForms(AppDataTestCase):
 
 
 class TestSerialization(AppDataTestCase):
-    def test_dates_are_serialized_on_write(self):
-        class MyForm(AppDataForm):
-            publish_from = forms.DateField()
-        MyAppContainer = AppDataContainer.from_form(MyForm)
+    class MyForm(AppDataForm):
+        publish_from = forms.DateField()
+
+    def setUp(self):
+        super(TestSerialization, self).setUp()
+
+        MyAppContainer = AppDataContainer.from_form(self.MyForm)
         app_registry.register('myapp', MyAppContainer)
+        self.article = Article()
+        self.article.app_data.myapp.publish_from = date(2012, 8, 26)
+        self.article.save()
 
-        art = Article()
-        my_app_data = art.app_data['myapp']
-        my_app_data.publish_from = date(2012, 8, 26)
-        art.save()
-
-        art = Article.objects.get(pk=art.pk)
+    def _test_article(self, art):
         tools.assert_equals({'myapp': {'publish_from': '2012-08-26'}}, art.app_data)
         tools.assert_equals({'publish_from': '2012-08-26'}, art.app_data.myapp._data)
 
         tools.assert_equals(date(2012, 8, 26), art.app_data.myapp['publish_from'])
         tools.assert_equals(date(2012, 8, 26), art.app_data.myapp.publish_from)
+
+    def test_dates_are_serialized_on_write(self):
+        art = Article.objects.get(pk=self.article.pk)
+        self._test_article(art)
+
+    def test_pickle_support(self):
+        data = pickle.dumps(self.article)
+        unpickled_article = pickle.loads(data)
+        self._test_article(unpickled_article)
 
 class TestAppDataContainers(AppDataTestCase):
     def test_registered_classes_can_behave_as_attrs(self):

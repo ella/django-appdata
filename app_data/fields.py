@@ -24,6 +24,7 @@ class AppDataDescriptor(Creator):
 
         value._instance = instance
         value._model = instance.__class__
+        value._app_registry = app_registry
         return value
 
     def __set__(self, instance, value):
