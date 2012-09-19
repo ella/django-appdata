@@ -23,17 +23,22 @@ class TestMultiForm(AppDataTestCase):
         publish_to = forms.DateField(required=False)
         related_article = ModelChoiceField(queryset=Article.objects.all(), required=False)
 
+    class MyForm2(AppDataForm):
+        foo = forms.CharField(max_length=100)
+
     def setUp(self):
         super(TestMultiForm, self).setUp()
         MyAppContainer = AppDataContainer.from_form(self.MyForm)
         app_registry.register('myapp', MyAppContainer)
+        app_registry.register('myapp2', AppDataContainer.from_form(self.MyForm2))
 
     def test_multi_form_saves_all_the_forms(self):
         ModelForm = modelform_factory(Article)
-        MF = multiform_factory(ModelForm, myapp={})
+        MF = multiform_factory(ModelForm)
         data = {
             'myapp-title': 'First',
             'myapp-publish_from': '2010-11-12',
+            'myapp2-foo': 'Second',
         }
         form = MF(data)
         tools.assert_true(form.is_valid())
@@ -46,7 +51,8 @@ class TestMultiForm(AppDataTestCase):
                     'publish_to': None,
                     'related_article': None,
                     'title': u'First'
-                }
+                },
+                'myapp2': {'foo': 'Second'}
             },
             art.app_data
         )
