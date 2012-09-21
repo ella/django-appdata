@@ -41,17 +41,27 @@ class TestForms(AppDataTestCase):
         tools.assert_true(isinstance(art.app_data['myapp'], MyAppContainer))
         tools.assert_equals('Hullo!', art.app_data.myapp.get('title'))
 
+    def test_get_fallback_value(self):
+        class MyForm(AppDataForm):
+            title = forms.CharField(max_length=25, initial='Hullo!')
+        MyAppContainer = AppDataContainer.from_form(MyForm)
+        app_registry.register('myapp', MyAppContainer)
+
+        art = Article()
+        tools.assert_equals(None, art.app_data.myapp.get('foo'))
+        tools.assert_equals('bar', art.app_data.myapp.get('foo', 'bar'))
+
     def test_get_semantics_for_getitem(self):
         class MyForm(AppDataForm):
             title = forms.CharField(max_length=25, initial='Hullo!')
-            description = forms.CharField(max_length=25)
+            description = forms.CharField(max_length=25, required=False)
         MyAppContainer = AppDataContainer.from_form(MyForm)
         app_registry.register('myapp', MyAppContainer)
 
         art = Article()
         tools.assert_equals('Hullo!', art.app_data.myapp.title)
-        # empty initial values default to None
-        tools.assert_equals(None, art.app_data.myapp.description)
+        # empty initial value falls back to field's type
+        tools.assert_equals('', art.app_data.myapp.description)
 
 
 class TestSerialization(AppDataTestCase):

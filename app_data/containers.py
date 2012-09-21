@@ -137,10 +137,16 @@ class AppDataContainer(object):
 
         # defined field, still uncleaned, retrieve from self._form and put in cache
         if name in self._form.fields and name not in self._attr_cache:
+            field = self._form.fields[name]
             if name in self._data:
-                self._attr_cache[name] = self._form.fields[name].clean(self._data[name])
+                self._attr_cache[name] = field.clean(self._data[name])
             else:
-                self._attr_cache[name] = self._form.fields[name].initial
+                # we still want to invoke clean. otherwise, there's no way to
+                # tell a ChoiceField to return an empty list. (hint, setting
+                # initial=[] is an awful idea).
+                # don't store this value in the attr cache because there's no
+                # need to save it to the database
+                return field.clean(field.initial)
 
         # defined field stored in cache, return it
         if name in self._attr_cache:
@@ -168,9 +174,7 @@ class AppDataContainer(object):
         try:
             return self[name]
         except KeyError:
-            if default is INITIAL and name in self._form.fields:
-                return self._form.fields[name].initial
-            elif default is INITIAL:
+            if default is INITIAL:
                 return None
             return default
 
