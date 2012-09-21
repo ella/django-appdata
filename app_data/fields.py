@@ -1,3 +1,4 @@
+from django import forms
 from django.utils import simplejson as json
 from django.db.models.fields.subclassing import Creator
 from django.db.models import TextField
@@ -59,5 +60,15 @@ class AppDataField(TextField):
         value.validate(model_instance)
 
 
-add_introspection_rules([], ["^app_data\.fields\.AppDataField"])
+class ListModelMultipleChoiceField(forms.ModelMultipleChoiceField):
+    """
+    A ModelMultipleChoiceField that cleans to a list instead of a QuerySet
 
+    Use this on AppDataForms rather than a ModelMultipleChoiceField to make it
+    possible to manipulate the app data field like a list.
+    """
+    def clean(self, value):
+        value = super(ListModelMultipleChoiceField, self).clean(value)
+        return value and list(value) or value
+
+add_introspection_rules([], ["^app_data\.fields\.AppDataField"])
