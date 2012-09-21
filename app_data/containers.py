@@ -138,15 +138,11 @@ class AppDataContainer(object):
         # defined field, still uncleaned, retrieve from self._form and put in cache
         if name in self._form.fields and name not in self._attr_cache:
             field = self._form.fields[name]
-            if name in self._data:
-                self._attr_cache[name] = field.clean(self._data[name])
-            else:
-                # we still want to invoke clean. otherwise, there's no way to
-                # tell a ChoiceField to return an empty list. (hint, setting
-                # initial=[] is an awful idea).
-                # don't store this value in the attr cache because there's no
-                # need to save it to the database
-                return field.clean(field.initial)
+            # we want to invoke clean, even on initial values. otherwise it's
+            # quite inelegant to work with collection types like lists, as
+            # initial=[] will lead to a single list instance being used for all
+            # instances.
+            self._attr_cache[name] = field.clean(self._data.get(name, field.initial))
 
         # defined field stored in cache, return it
         if name in self._attr_cache:
