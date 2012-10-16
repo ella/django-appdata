@@ -100,12 +100,14 @@ class AppDataContainer(object):
         self._accessed = False
         self._instance = model_instance
 
+    def __repr__(self):
+        return '<%s: %r>' % (self.__class__.__name__, self.serialize())
+
     def __eq__(self, other):
         if isinstance(other, AppDataContainer):
-            #FIXME: _attr_cache
-            return self._data == other._data
+            return self.serialize() == other.serialize()
         elif isinstance(other, dict):
-            return other == self._data
+            return other == self.serialize()
         return False
 
     @property
