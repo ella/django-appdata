@@ -2,6 +2,7 @@ from django import forms
 from django.utils import simplejson as json
 from django.db.models.fields.subclassing import Creator
 from django.db.models import TextField
+from django.utils.encoding import smart_unicode
 
 from south.modelsinspector import add_introspection_rules
 
@@ -58,6 +59,14 @@ class AppDataField(TextField):
     def validate(self, value, model_instance):
         super(AppDataField, self).validate(value, model_instance)
         value.validate(model_instance)
+
+    def value_to_string(self, obj):
+        val = self._get_val_from_obj(obj)
+
+        if isinstance(val, AppDataContainerFactory):
+            val = val.serialize()
+
+        return smart_unicode(val)
 
 
 class ListModelMultipleChoiceField(forms.ModelMultipleChoiceField):
