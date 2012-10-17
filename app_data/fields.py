@@ -61,12 +61,14 @@ class AppDataField(TextField):
         value.validate(model_instance)
 
     def value_to_string(self, obj):
-        val = self._get_val_from_obj(obj)
+        value = self._get_val_from_obj(obj)
 
-        if isinstance(val, AppDataContainerFactory):
-            val = val.serialize()
+        if isinstance(value, AppDataContainerFactory):
+            value = value.serialize()
+        if isinstance(value, dict):
+            value = json.dumps(value)
 
-        return smart_unicode(val)
+        return smart_unicode(value)
 
 
 class ListModelMultipleChoiceField(forms.ModelMultipleChoiceField):
