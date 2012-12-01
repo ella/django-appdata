@@ -2,7 +2,7 @@ from paver.easy import path, options
 from paver.setuputils import setup
 
 
-VERSION = (0, 1, 0)
+VERSION = (0, 1, 1)
 __version__ = VERSION
 __versionstr__ = '.'.join(map(str, VERSION))
 
@@ -14,6 +14,9 @@ f = (path(__file__).dirname() / 'requirements.txt').open()
 install_requires = f.read().strip()
 f.close()
 
+f = (path(__file__).dirname() / 'dev_requirements.txt').open()
+tests_require = f.read().strip().splitlines()[2:]
+f.close()
 
 options(
     setup = dict(
@@ -29,6 +32,7 @@ options(
     zip_safe = False,
     include_package_data = True,
     install_requires = install_requires,
+    tests_require = tests_require,
     test_suite = 'test_app_data.run_tests.run_all',
     classifiers = [
         "Development Status :: 4 - Beta",
