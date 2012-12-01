@@ -9,7 +9,7 @@ install:
    - python setup.py develop
 env:
   - DJANGO="1.3.3"
-  - DJANGO="1.4.1"
+  - DJANGO="1.4.2"
   - DJANGO="dev"
 script: python setup.py test
 matrix:
