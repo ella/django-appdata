@@ -1,4 +1,4 @@
-include README.rst requirements.txt
+include README.rst requirements.txt dev_requirements.txt
 include pavement.py setup.py paver-minilib.zip
 
 recursive-include app_data *
