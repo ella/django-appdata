@@ -107,6 +107,14 @@ class TestMultiForm(AppDataTestCase):
             art.app_data
         )
 
+    def test_added_form_doesnt_appear_on_parent(self):
+        ArticleModelForm = modelform_factory(Article)
+        class MF(MultiForm):
+            ModelForm = ArticleModelForm
+        MF.add_form('myapp', {})
+
+        tools.assert_equals({}, MultiForm.app_form_opts)
+
     def test_form_can_be_removed(self):
         ModelForm = modelform_factory(Article)
         MF = multiform_factory(ModelForm, myapp={})

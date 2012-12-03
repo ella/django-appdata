@@ -53,10 +53,16 @@ class BaseFieldsDescriptor(object):
 
         return self._base_fields
 
+class AppFormOptsDescriptor(object):
+    def __get__(self, instance, owner):
+        # we cannot check hasattr because parent's app_form_opts would pick it up
+        if not '_app_form_opts' in owner.__dict__:
+            setattr(owner, '_app_form_opts', {})
+        return owner._app_form_opts
 
 class MultiForm(object):
     app_data_field = 'app_data'
-    app_form_opts = {}
+    app_form_opts = AppFormOptsDescriptor()
 
     def __init__(self, *args, **kwargs):
         # construct the main model form
@@ -204,5 +210,5 @@ def multiform_factory(model_form, base_class=MultiForm, app_data_field='app_data
     name = name or '%sWithAppDataForm' % model_form._meta.model.__name__
     return type(
         name, (base_class, ),
-        {'ModelForm': model_form, 'app_data_field': app_data_field, 'app_form_opts': form_opts}
+        {'ModelForm': model_form, 'app_data_field': app_data_field, '_app_form_opts': form_opts}
     )
