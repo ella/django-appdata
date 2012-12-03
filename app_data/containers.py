@@ -23,7 +23,7 @@ class AppDataContainerFactory(dict):
 
     def __getattr__(self, name):
         if name.startswith('_') or self._app_registry.get_class(name, self._model) is None:
-            raise AttributeError()
+            raise AttributeError(name)
         return self[name]
 
     def __getitem__(self, name):
@@ -155,11 +155,11 @@ class AppDataContainer(object):
     def __getattr__(self, name):
         " Provide access to fields as attributes. "
         if name.startswith('_'):
-            raise AttributeError()
+            raise AttributeError(name)
         try:
             return self.__getitem__(name)
         except KeyError:
-            raise AttributeError()
+            raise AttributeError(name)
 
     def __delitem__(self, name):
         self._accessed = True
