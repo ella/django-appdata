@@ -1,5 +1,4 @@
 from django.contrib.admin import site
-from django.forms.models import modelform_factory
 
 from app_data.admin import AppDataModelAdmin, AddDataTabularInline
 from app_data.forms import multiform_factory
@@ -10,8 +9,8 @@ app_data = {
     'publish': { 'exclude': ['publish_to'] },
     'rss': { 'fields': ['title', 'author',] }
 }
-ArticleMultiForm = multiform_factory(modelform_factory(Article), **app_data)
-AuthorMultiForm = multiform_factory(modelform_factory(Author), personal={'fields': ['first', 'last']})
+ArticleMultiForm = multiform_factory(Article, form_opts=app_data)
+AuthorMultiForm = multiform_factory(Author, form_opts={'personal': {'fields': ['first', 'last']}})
 
 class AuthorInline(AddDataTabularInline):
     model = Author

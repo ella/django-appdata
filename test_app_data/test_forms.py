@@ -1,7 +1,7 @@
 from datetime import date
 
 from django import forms
-from django.forms.models import ModelChoiceField, modelform_factory, formset_factory
+from django.forms.models import ModelChoiceField, modelform_factory
 
 from app_data.forms import multiform_factory, MultiForm, multiformset_factory
 from app_data.registry import app_registry
@@ -32,9 +32,6 @@ class TestMultiForm(AppDataTestCase):
         app_registry.register('myapp2', AppDataContainer.from_form(self.MyForm2))
 
     def test_multi_form_can_work_with_formsets(self):
-        ModelForm = modelform_factory(Article)
-        MF = multiform_factory(ModelForm)
-        MF.add_form('myapp')
         FormSet = multiformset_factory(Article, form_opts={'myapp': {}})
         data = {
             'fs-TOTAL_FORMS': '1',
@@ -62,10 +59,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_multi_form_saves_all_the_forms(self):
-        ModelForm = modelform_factory(Article)
-        MF = multiform_factory(ModelForm)
-        MF.add_form('myapp')
-        MF.add_form('myapp2')
+        MF = multiform_factory(Article, form_opts={'myapp': {}, 'myapp2': {}})
         data = {
             'myapp-title': 'First',
             'myapp-publish_from': '2010-11-12',
@@ -89,8 +83,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_form_can_be_added_to_parent(self):
-        ModelForm = modelform_factory(Article)
-        MF = multiform_factory(ModelForm, base_class=self.MyMultiForm)
+        MF = multiform_factory(Article, multiform=self.MyMultiForm)
         self.MyMultiForm.add_form('myapp', {})
         data = {
             'myapp-title': 'First',
@@ -113,8 +106,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_form_can_be_added(self):
-        ModelForm = modelform_factory(Article)
-        MF = multiform_factory(ModelForm)
+        MF = multiform_factory(Article)
         MF.add_form('myapp', {})
         data = {
             'myapp-title': 'First',
@@ -145,8 +137,7 @@ class TestMultiForm(AppDataTestCase):
         tools.assert_equals({}, MultiForm.app_form_opts)
 
     def test_form_can_be_removed(self):
-        ModelForm = modelform_factory(Article)
-        MF = multiform_factory(ModelForm, myapp={})
+        MF = multiform_factory(Article, form_opts={'myapp': {}})
         MF.remove_form('myapp')
         data = {
             'myapp-title': 'First',

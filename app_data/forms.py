@@ -4,7 +4,7 @@ except ImportError:
     methodcaller = lambda name: lambda o: getattr(o, name)()
 
 from django.forms.forms import NON_FIELD_ERRORS, Form
-from django.forms.models import ModelForm, modelformset_factory, modelform_factory
+from django.forms.models import ModelForm, modelformset_factory, modelform_factory, _get_foreign_key, BaseInlineFormSet
 
 class AppDataForm(Form):
     def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
@@ -222,17 +222,16 @@ class MultiForm(object):
         return self.model_form.save(**kwargs)
 
 
-def multiform_factory(model_form, base_class=MultiForm, app_data_field='app_data', name=None, **form_opts):
+def multiform_factory(model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={}, **kwargs):
+    model_form = modelform_factory(model, **kwargs)
     name = name or '%sWithAppDataForm' % model_form._meta.model.__name__
     return type(
-        name, (base_class, ),
+        name, (multiform, ),
         {'ModelForm': model_form, 'app_data_field': app_data_field, '_app_form_opts': form_opts}
     )
 
-def multiformset_factory(model, model_form=ModelForm, multiform=MultiForm, form_opts={}, **kwargs):
-    modelform = modelform_factory(model, form=model_form, **kwargs)
-    multiform = multiform_factory(modelform, base_class=multiform, **form_opts)
-
+def multiformset_factory(model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={}, **kwargs):
+    multiform = multiform_factory(model, multiform, app_data_field, name, form_opts, **kwargs)
     FormSet = modelformset_factory(model, multiform, **kwargs)
     FormSet.model = model
     return FormSet
