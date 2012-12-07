@@ -125,6 +125,11 @@ class MultiForm(object):
 
     # properties delegated to model_form
     @property
+    def _meta(self):
+        # user by BaseInlineFormSet.add_fields
+        return self.model_form._meta
+
+    @property
     def fields(self):
         # user by BaseModelFormSet.add_fields
         return self.model_form.fields
@@ -243,4 +248,14 @@ def multiformset_factory(model, multiform=MultiForm, app_data_field='app_data', 
     multiform = multiform_factory(model, multiform, app_data_field, name, form_opts, **kwargs)
     FormSet = formset_factory(multiform, formset=formset, extra=extra, can_order=can_order, can_delete=can_delete, max_num=max_num)
     FormSet.model = model
+    return FormSet
+
+def multiinlineformset_factory(parent_model, model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={},
+                                formset=BaseInlineFormSet, fk_name=None, **kwargs):
+    fk = _get_foreign_key(parent_model, model, fk_name=fk_name)
+    if fk.unique:
+        kwargs['max_num'] = 1
+
+    FormSet = multiformset_factory(model, multiform, app_data_field, name, form_opts, formset=formset, **kwargs)
+    FormSet.fk = fk
     return FormSet

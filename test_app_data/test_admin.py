@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 
-from nose import tools, SkipTest
+from nose import tools
 
 from .models import Article, Author
 from .cases import AppDataTestCase
@@ -40,7 +40,6 @@ class TestAppDataAdmin(AppDataTestCase):
         )
 
     def test_admin_can_create_article_with_inlines(self):
-        raise SkipTest()
         response = self.client.post(self.url + 'add/', {
             'publish-publish_from': '2010-10-10',
             'rss-title': 'Hullo!',
@@ -48,16 +47,24 @@ class TestAppDataAdmin(AppDataTestCase):
 
             'author_set-INITIAL_FORMS': '0',
             'author_set-TOTAL_FORMS': '1',
-            'author_set-0-personal-first': 'Johnny',
-            'author_set-0-personal-last': 'Mnemonic',
+
+            'author_set-0-personal-first_name': 'Johnny',
+            'author_set-0-personal-last_name': 'Mnemonic',
         })
         tools.assert_equals(302, response.status_code)
         tools.assert_equals(1, Article.objects.count())
         art = Article.objects.all()[0]
         tools.assert_equals(1, Author.objects.count())
         author = Author.objects.all()[0]
-        tools.assert_equals(author.publishable, art)
-        tools.assert_equals({'aa': 42}, author.app_data)
+        tools.assert_equals(author.publishable_id, art.id)
+        tools.assert_equals(
+            {
+                u'personal': {
+                    u'first_name': u'Johnny', u'last_name': u'Mnemonic'
+                }
+            },
+            author.app_data
+        )
 
     def test_admin_can_render_multiform(self):
         response = self.client.get(self.url + 'add/')

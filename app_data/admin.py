@@ -3,7 +3,7 @@ from functools import partial
 from django.contrib.admin.util import flatten_fieldsets
 from django.contrib.admin.options import ModelAdmin, InlineModelAdmin
 
-from app_data.forms import multiform_factory, MultiForm
+from app_data.forms import multiform_factory, multiinlineformset_factory, MultiForm
 
 class AppDataAdminMixin(object):
 
@@ -73,7 +73,18 @@ class AppDataModelAdmin(AppDataAdminMixin, ModelAdmin):
         return multiform_factory(self.model, **self._get_form_factory_opts(request, obj, **kwargs))
 
 class AppDataInlineModelAdmin(AppDataAdminMixin, InlineModelAdmin):
-    pass
+    def get_formset(self, request, obj=None, **kwargs):
+        can_delete = self.can_delete and self.has_delete_permission(request, obj)
+        defaults = {
+            "formset": self.formset,
+            "fk_name": self.fk_name,
+            "extra": self.extra,
+            "max_num": self.max_num,
+            "can_delete": can_delete,
+        }
+        defaults.update(self._get_form_factory_opts(request, obj, **kwargs))
+
+        return multiinlineformset_factory(self.parent_model, self.model, **defaults)
 
 class AppDataStackedInline(AppDataInlineModelAdmin):
     template = 'admin/edit_inline/stacked.html'
