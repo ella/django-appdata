@@ -4,6 +4,7 @@ except ImportError:
     methodcaller = lambda name: lambda o: getattr(o, name)()
 
 from django.forms.forms import NON_FIELD_ERRORS, Form
+from django.forms.models import ModelForm, modelformset_factory, modelform_factory
 
 class AppDataForm(Form):
     def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
@@ -77,7 +78,10 @@ class MultiForm(object):
         self.app_forms = {}
         app_container = getattr(self.model_form.instance, self.app_data_field)
         for label, label_opts in self.get_app_form_opts().iteritems():
-            self.app_forms[label] = app_container[label].get_form(data, files, prefix=label, **label_opts)
+            prefix = label
+            if self.model_form.prefix:
+                prefix = '%s-%s' % (self.model_form.prefix, prefix)
+            self.app_forms[label] = app_container[label].get_form(data, files, prefix=prefix, **label_opts)
 
     @classmethod
     def get_app_form_opts(cls):
@@ -120,6 +124,14 @@ class MultiForm(object):
 
     # properties delegated to model_form
     @property
+    def fields(self):
+        return self.model_form.fields
+
+    @property
+    def instance(self):
+        return self.model_form.instance
+
+    @property
     def media(self):
         return self.model_form.media
 
@@ -155,7 +167,7 @@ class MultiForm(object):
         return all(map(methodcaller('is_valid'), self._get_all_forms()))
 
     def has_changed(self):
-        return all(map(methodcaller('has_changed'), self._get_all_forms()))
+        return any(map(methodcaller('has_changed'), self._get_all_forms()))
 
     def __getitem__(self, name):
         # provide access to app.field as well
@@ -209,9 +221,18 @@ class MultiForm(object):
         # save the model itself
         return self.model_form.save(**kwargs)
 
+
 def multiform_factory(model_form, base_class=MultiForm, app_data_field='app_data', name=None, **form_opts):
     name = name or '%sWithAppDataForm' % model_form._meta.model.__name__
     return type(
         name, (base_class, ),
         {'ModelForm': model_form, 'app_data_field': app_data_field, '_app_form_opts': form_opts}
     )
+
+def multiformset_factory(model, model_form=ModelForm, multiform=MultiForm, form_opts={}, **kwargs):
+    modelform = modelform_factory(model, form=model_form, **kwargs)
+    multiform = multiform_factory(modelform, base_class=multiform, **form_opts)
+
+    FormSet = modelformset_factory(model, multiform, **kwargs)
+    FormSet.model = model
+    return FormSet

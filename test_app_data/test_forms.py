@@ -1,9 +1,9 @@
 from datetime import date
 
 from django import forms
-from django.forms.models import ModelChoiceField, modelform_factory
+from django.forms.models import ModelChoiceField, modelform_factory, formset_factory
 
-from app_data.forms import multiform_factory, MultiForm
+from app_data.forms import multiform_factory, MultiForm, multiformset_factory
 from app_data.registry import app_registry
 from app_data.containers import AppDataContainer, AppDataForm
 
@@ -30,6 +30,36 @@ class TestMultiForm(AppDataTestCase):
         MyAppContainer = AppDataContainer.from_form(self.MyForm)
         app_registry.register('myapp', MyAppContainer)
         app_registry.register('myapp2', AppDataContainer.from_form(self.MyForm2))
+
+    def test_multi_form_can_work_with_formsets(self):
+        ModelForm = modelform_factory(Article)
+        MF = multiform_factory(ModelForm)
+        MF.add_form('myapp')
+        FormSet = multiformset_factory(Article, form_opts={'myapp': {}})
+        data = {
+            'fs-TOTAL_FORMS': '1',
+            'fs-INITIAL_FORMS': '0',
+
+            'fs-0-myapp-title': 'First',
+            'fs-0-myapp-publish_from': '2010-11-12',
+        }
+        formset = FormSet(data, prefix='fs')
+
+        tools.assert_true(formset.is_valid())
+        formset.save()
+        tools.assert_equals(1, Article.objects.count())
+        art = Article.objects.all()[0]
+        tools.assert_equals(
+            {
+                'myapp': {
+                    'publish_from': '2010-11-12',
+                    'publish_to': None,
+                    'related_article': None,
+                    'title': u'First'
+                },
+            },
+            art.app_data
+        )
 
     def test_multi_form_saves_all_the_forms(self):
         ModelForm = modelform_factory(Article)
