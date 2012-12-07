@@ -74,7 +74,9 @@ class AppDataModelAdmin(AppDataAdminMixin, ModelAdmin):
 
 class AppDataInlineModelAdmin(AppDataAdminMixin, InlineModelAdmin):
     def get_formset(self, request, obj=None, **kwargs):
-        can_delete = self.can_delete and self.has_delete_permission(request, obj)
+        can_delete = self.can_delete
+        if hasattr(self, 'has_delete_permission'):
+            can_delete = can_delete and self.has_delete_permission(request, obj)
         defaults = {
             "formset": self.formset,
             "fk_name": self.fk_name,
