@@ -125,6 +125,14 @@ class MultiForm(object):
 
     # properties delegated to model_form
     @property
+    def _get_validation_exclusions(self):
+        return self.model_form._get_validation_exclusions
+
+    @property
+    def cleaned_data(self):
+        return self.model_form.cleaned_data
+
+    @property
     def _meta(self):
         # user by BaseInlineFormSet.add_fields
         return self.model_form._meta
