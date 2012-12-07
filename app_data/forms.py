@@ -4,7 +4,8 @@ except ImportError:
     methodcaller = lambda name: lambda o: getattr(o, name)()
 
 from django.forms.forms import NON_FIELD_ERRORS, Form
-from django.forms.models import ModelForm, modelformset_factory, modelform_factory, _get_foreign_key, BaseInlineFormSet
+from django.forms.formsets import formset_factory
+from django.forms.models import modelform_factory, _get_foreign_key, BaseInlineFormSet, BaseModelFormSet
 
 class AppDataForm(Form):
     def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
@@ -125,7 +126,13 @@ class MultiForm(object):
     # properties delegated to model_form
     @property
     def fields(self):
+        # user by BaseModelFormSet.add_fields
         return self.model_form.fields
+
+    @property
+    def _raw_value(self):
+        # used by FormSet._should_delete_form
+        return self.model_form._raw_value
 
     @property
     def instance(self):
@@ -230,8 +237,10 @@ def multiform_factory(model, multiform=MultiForm, app_data_field='app_data', nam
         {'ModelForm': model_form, 'app_data_field': app_data_field, '_app_form_opts': form_opts}
     )
 
-def multiformset_factory(model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={}, **kwargs):
+def multiformset_factory(model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={},
+                         formset=BaseModelFormSet, extra=3, can_order=False, can_delete=True, max_num=None,
+                         **kwargs):
     multiform = multiform_factory(model, multiform, app_data_field, name, form_opts, **kwargs)
-    FormSet = modelformset_factory(model, multiform, **kwargs)
+    FormSet = formset_factory(multiform, formset=formset, extra=extra, can_order=can_order, can_delete=can_delete, max_num=max_num)
     FormSet.model = model
     return FormSet
