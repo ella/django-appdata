@@ -1,7 +1,6 @@
 from datetime import date
 
 from django import forms
-from django.conf import settings
 from django.forms.models import ModelChoiceField, modelform_factory
 
 from app_data.forms import multiform_factory, MultiForm

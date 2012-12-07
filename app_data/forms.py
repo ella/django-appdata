@@ -154,6 +154,9 @@ class MultiForm(object):
     def is_valid(self):
         return all(map(methodcaller('is_valid'), self._get_all_forms()))
 
+    def has_changed(self):
+        return all(map(methodcaller('has_changed'), self._get_all_forms()))
+
     def __getitem__(self, name):
         # provide access to app.field as well
         app = None
