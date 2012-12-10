@@ -20,7 +20,7 @@ Extending Models
 ****************
 
 Your code can register a namespace on any (or all) `AppDataField` and store
-it's own data there:
+it's own data there::
 
     from django.forms.models import ModelMultipleChoiceField
     from app_data import app_registry, AppDataForm, AppDataContainer
@@ -32,7 +32,7 @@ it's own data there:
         admin_tags = ModelMultipleChoiceField(Tag.objects.all())
     app_registry.register('tagging', AppDataContainer.from_form(TaggingAppDataForm))
 
-This should give you access to `'tagging'` namespace in any defined `AppDataField`:
+This should give you access to `'tagging'` namespace in any defined `AppDataField`::
 
     from django.db import models
     from app_data import AppDataField
@@ -50,14 +50,14 @@ Extending Forms
 `django-appdata` supplies a `MultiForm` class - a wrapper around django's `ModelForm`
 with optional added sub-forms that corresponds to namespaces registered in the
 model's `AppDataField`, typically the extendable app would create and use a
-`MultiForm` instead of a regular `ModelForm`:
+`MultiForm` instead of a regular `ModelForm`::
 
     from app_data.forms import multiform_factory
     from .models import BlogPost
 
     BlogPostMultiForm = multiform_factory(BlogPost)
 
-And when using that app any project can add additional sub-forms to that `MultiForm`:
+And when using that app any project can add additional sub-forms to that `MultiForm`::
 
     from blog_app.forms import BlogPostMultiForm
 
@@ -70,7 +70,7 @@ MultiForms in Admin
 *******************
 
 If you wish to add your own code to the admin interface, just use
-`AppDataModelAdmin`:
+`AppDataModelAdmin`::
 
     from django.contrib import admin
     from app_data.admin import AppDataModelAdmin
