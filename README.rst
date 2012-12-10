@@ -133,6 +133,7 @@ If you wish to add your own code to the admin interface, just use
             (None, {'fields': ['text', ]}),
             ('Tagging': {'fields': [('tagging.public_tags', 'tagging.admin_tags')]})
         ]
+    admin.site.register(BlogPost, BlogPostAdmin)
 
 Additional Options
 ~~~~~~~~~~~~~~~~~~
