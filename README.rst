@@ -54,7 +54,7 @@ This should give you access to `'tagging'` namespace in any defined `AppDataFiel
     from blog_app.models import BlogPost
 
     bp = BlogPost()
-    assert bp.app_data.tagging.tag_string == ""
+    assert bp.app_data.tagging.tag_string() == ""
 
 
 Additional Options
