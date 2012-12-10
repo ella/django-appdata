@@ -19,8 +19,18 @@ to provide a standardised approach to extending existing apps.
 Extending Models
 ****************
 
-Your code can register a namespace on any (or all) `AppDataField` and store
-it's own data there::
+When you have an extendable django app using the `AppDataField`::
+
+    from django.db import models
+    from app_data import AppDataField
+
+    class BlogPost(models.Model):
+        text = models.TextField()
+        app_data = AppDataField()
+
+your code can register a namespace on any (or all) `AppDataField` and store
+it's own data there byt registering a *container* (subclass of
+`AppDataContainer`). To define the data you use django's form framework::
 
     from django.forms.models import ModelMultipleChoiceField
     from app_data import app_registry, AppDataForm, AppDataContainer
@@ -30,19 +40,36 @@ it's own data there::
     class TaggingAppDataForm(AppDataForm):
         public_tags = ModelMultipleChoiceField(Tag.objects.all())
         admin_tags = ModelMultipleChoiceField(Tag.objects.all())
-    app_registry.register('tagging', AppDataContainer.from_form(TaggingAppDataForm))
+
+    class TaggingAppDataContainer(AppDataContainer):
+        form_class = TaggingAppDataForm
+        
+        def tag_string(self):
+            print ', '.join(t.name for t in self.public_tags)
+
+    app_registry.register('tagging', TaggingAppDataContainer)
 
 This should give you access to `'tagging'` namespace in any defined `AppDataField`::
 
-    from django.db import models
-    from app_data import AppDataField
-
-    class BlogPost(models.Model):
-        text = models.TextField()
-        app_data = AppDataField()
+    from blog_app.models import BlogPost
 
     bp = BlogPost()
-    assert bp.app_data.tagging.public_tags == []
+    assert bp.app_data.tagging.tag_string == ""
+
+
+Additional Options
+~~~~~~~~~~~~~~~~~~
+
+Note that if you don't need to add custom methods to your container you can
+just use a factory to create the subclass::
+
+    app_registry.register('tagging', AppDataContainer.from_form(TaggingAppDataForm))
+
+Additionaly you can restrict the registration to a given model::
+
+    from blog_app.models import BlogPost
+
+    app_registry.register('tagging', TaggingAppDataContainer, BlogPost)
 
 Extending Forms
 ***************
@@ -66,6 +93,29 @@ And when using that app any project can add additional sub-forms to that `MultiF
 This way when the reusable app's code can remain unchanged and we can inject
 additional form logic to it's processing.
 
+Additional Options
+~~~~~~~~~~~~~~~~~~
+
+Any arguments and keyword arguments are passed without change to the
+`ModelForm` class the `MultiForm` is wrapping so even if you have custom args
+for your `ModelForm` everything will still work::
+
+    from django.forms.models import BaseModelForm
+
+    class ModelFormWithUser(ModelForm):
+        def __init__(self, user, *wargs, **kwargs):
+            self.user = user
+            super(ModelFormWithUser, self).__init__(*args, **kwargs)
+
+    BlogPostMultiForm = multiform_factory(BlogPost, form=ModelFormWithUser)
+
+And of course you are not limitted to the use of a factory function::
+
+    from app_data import MultiForm
+
+    class MyMultiForm(MultiForm):
+        ModelForm = BlogPostModelForm
+
 MultiForms in Admin
 *******************
 
@@ -84,11 +134,27 @@ If you wish to add your own code to the admin interface, just use
             ('Tagging': {'fields': [('tagging.public_tags', 'tagging.admin_tags')]})
         ]
 
+Additional Options
+~~~~~~~~~~~~~~~~~~
+
+As with django's admin and forms you can supply your own `MultiForm` class by
+using the `multiform` attribute of `AppDataModelAdmin`.
+
 Behind the scenes
 *****************
 
 `django-appdata` uses a `TextField` to store the data on the model using JSON
 and django's forms framework for (de)serialization and validation of the data.
+
+When accessing the containers in the field we will try to locate the
+appropriate container in the registry. If none is found, plain data will be
+returned if present (dict). To assure everything working properly e recommend
+putting some sort of init code in place for your project that wil make sure all
+the registration is done before any actual code is run. We areusing a module
+called `register` in our apps and then a `piece of code`_ similar to admin's
+autodiscover to iterate through installed apps and load this module.
+
+.. _`piece of code`: https://github.com/ella/ella/blob/master/ella/utils/installedapps.py#L27
 
 Build status
 ************
