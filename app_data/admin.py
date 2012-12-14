@@ -70,10 +70,14 @@ class AppDataModelAdmin(AppDataAdminMixin, ModelAdmin):
         Returns a Form class for use in the admin add view. This is used by
         add_view and change_view.
         """
+        if self.multiform is None:
+            return super(AppDataModelAdmin, self).get_form(request, obj=obj, **kwargs)
         return multiform_factory(self.model, **self._get_form_factory_opts(request, obj, **kwargs))
 
 class AppDataInlineModelAdmin(AppDataAdminMixin, InlineModelAdmin):
     def get_formset(self, request, obj=None, **kwargs):
+        if self.multiform is None:
+            return super(AppDataModelAdmin, self).get_formset(request, obj=obj, **kwargs)
         can_delete = self.can_delete
         if hasattr(self, 'has_delete_permission'):
             can_delete = can_delete and self.has_delete_permission(request, obj)
