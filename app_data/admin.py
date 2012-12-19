@@ -95,6 +95,6 @@ class AppDataInlineModelAdmin(AppDataAdminMixin, InlineModelAdmin):
 class AppDataStackedInline(AppDataInlineModelAdmin):
     template = 'admin/edit_inline/stacked.html'
 
-class AddDataTabularInline(AppDataInlineModelAdmin):
+class AppDataTabularInline(AppDataInlineModelAdmin):
     template = 'admin/edit_inline/tabular.html'
 
