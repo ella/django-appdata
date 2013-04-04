@@ -6,6 +6,7 @@ except ImportError:
 from django.forms.forms import NON_FIELD_ERRORS, Form
 from django.forms.formsets import formset_factory
 from django.forms.models import modelform_factory, _get_foreign_key, BaseInlineFormSet, BaseModelFormSet
+from django.utils.safestring import mark_safe
 
 class AppDataForm(Form):
     def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
@@ -175,13 +176,13 @@ class MultiForm(object):
         return self.as_table()
 
     def as_ul(self):
-        return '\n'.join(map(methodcaller('as_ul'), self._get_all_forms()))
+        return mark_safe(u'\n'.join(map(methodcaller('as_ul'), self._get_all_forms())))
 
     def as_table(self):
-        return '\n'.join(map(methodcaller('as_table'), self._get_all_forms()))
+        return mark_safe(u'\n'.join(map(methodcaller('as_table'), self._get_all_forms())))
 
     def as_p(self):
-        return '\n'.join(map(methodcaller('as_p'), self._get_all_forms()))
+        return mark_safe(u'\n'.join(map(methodcaller('as_p'), self._get_all_forms())))
 
     def is_valid(self):
         return all(map(methodcaller('is_valid'), self._get_all_forms()))
