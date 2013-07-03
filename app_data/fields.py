@@ -21,12 +21,12 @@ class AppDataDescriptor(Creator):
             value = json.loads(value)
 
         if isinstance(value, dict) and not isinstance(value, AppDataContainerFactory):
-            value = AppDataContainerFactory(instance, value)
+            value = AppDataContainerFactory(instance, value, app_registry=self.field.app_registry)
             instance.__dict__[self.field.name] = value
 
         value._instance = instance
         value._model = instance.__class__
-        value._app_registry = app_registry
+        value._app_registry = self.field.app_registry
         return value
 
     def __set__(self, instance, value):
