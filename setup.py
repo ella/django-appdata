@@ -41,5 +41,5 @@ setup(
     install_requires=install_requires,
 
     test_suite='test_app_data.run_tests.run_all',
-    test_requires=test_requires,
+    tests_require=test_requires,
 )
