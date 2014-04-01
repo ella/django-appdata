@@ -11,7 +11,7 @@ long_description = f.read().strip()
 f.close()
 
 install_requires = [
-    'Django',
+    'Django>=1.4.10',
     'south>=0.7',
 ]
 test_requires = [
@@ -36,6 +36,7 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,

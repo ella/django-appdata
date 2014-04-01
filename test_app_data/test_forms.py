@@ -206,5 +206,6 @@ class TestAppDataForms(AppDataTestCase):
 
         article.save()
         article = Article.objects.get(pk=article.pk)
-        tools.assert_equals({u'title': u'First!'}, article.app_data.myapp._data)
+        tools.assert_equals('First!', article.app_data.myapp._data['title'])
+        tools.assert_not_in('publish_from', article.app_data.myapp._data)
 

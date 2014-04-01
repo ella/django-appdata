@@ -1,8 +1,10 @@
+import json
+
 from django import forms
-from django.utils import simplejson as json
 from django.db.models.fields.subclassing import Creator
 from django.db.models import TextField
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
+from django.utils import six
 
 from south.modelsinspector import add_introspection_rules
 
@@ -17,7 +19,7 @@ class AppDataDescriptor(Creator):
 
         value = instance.__dict__[self.field.name]
 
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             value = json.loads(value)
 
         if isinstance(value, dict) and not isinstance(value, AppDataContainerFactory):
@@ -68,7 +70,7 @@ class AppDataField(TextField):
         if isinstance(value, dict):
             value = json.dumps(value)
 
-        return smart_unicode(value)
+        return smart_text(value)
 
 
 class ListModelMultipleChoiceField(forms.ModelMultipleChoiceField):

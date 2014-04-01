@@ -151,8 +151,8 @@ class TestAppDataContainers(AppDataTestCase):
         data = inst.app_data.get('dummy', {})
         data['foo'] = 'bar'
         tools.assert_equals(data['foo'], 'bar')
-        tools.assert_equals(data.keys(), ['foo'])
-        tools.assert_equals(data.values(), ['bar'])
+        tools.assert_equals(list(data.keys()), ['foo'])
+        tools.assert_equals(list(data.values()), ['bar'])
 
     def test_alternate_registry(self):
         def _get_namespace(instance, namespace):

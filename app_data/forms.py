@@ -7,6 +7,7 @@ from django.forms.forms import NON_FIELD_ERRORS, Form
 from django.forms.formsets import formset_factory
 from django.forms.models import modelform_factory, _get_foreign_key, BaseInlineFormSet, BaseModelFormSet
 from django.utils.safestring import mark_safe
+from django.utils import six
 
 class AppDataForm(Form):
     def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
@@ -41,11 +42,11 @@ class BaseFieldsDescriptor(object):
             bf.update(owner.ModelForm.base_fields)
 
             # go through all the app forms...
-            for label, opts in owner.get_app_form_opts().iteritems():
+            for label, opts in six.iteritems(owner.get_app_form_opts()):
                 Form = app_container[label].form_class
                 exclude = set(opts.get('exclude', ()))
                 fields = opts.get('fields', None)
-                for name, field in Form.base_fields.iteritems():
+                for name, field in six.iteritems(Form.base_fields):
                     # skip proper fields
                     if fields is not None and name not in fields:
                         continue
@@ -79,7 +80,7 @@ class MultiForm(object):
         # construct all the app forms
         self.app_forms = {}
         app_container = getattr(self.model_form.instance, self.app_data_field)
-        for label, label_opts in self.get_app_form_opts().iteritems():
+        for label, label_opts in six.iteritems(self.get_app_form_opts()):
             prefix = label
             if self.model_form.prefix:
                 prefix = '%s-%s' % (self.model_form.prefix, prefix)
@@ -97,7 +98,7 @@ class MultiForm(object):
             # not a MultiForm, skip
             if not hasattr(c, 'app_form_opts'):
                 continue
-            for label, label_opts in c.app_form_opts.iteritems():
+            for label, label_opts in six.iteritems(c.app_form_opts):
                 if label in form_opts or label in skip_labels:
                     # form already defined, or should be skipped
                     continue
@@ -169,7 +170,7 @@ class MultiForm(object):
 
     def _get_all_forms(self):
         yield self.model_form
-        for f in self.app_forms.itervalues():
+        for f in six.itervalues(self.app_forms):
             yield f
 
     def __unicode__(self):
@@ -215,7 +216,7 @@ class MultiForm(object):
     def changed_data(self):
         if not hasattr(self, '_changed_data'):
             self._changed_data = cd = self.model_form.changed_data[:]
-            for label, form in self.app_forms.iteritems():
+            for label, form in six.iteritems(self.app_forms):
                 cd.extend(map(lambda n: '%s.%s' % (label, n), form.changed_data))
         return self._changed_data
 
@@ -224,8 +225,8 @@ class MultiForm(object):
         # combine all the errors
         if not hasattr(self, '_errors'):
             self._errors = self.model_form.errors.copy()
-            for label, form in self.app_forms.iteritems():
-                for k, v in form.errors.iteritems():
+            for label, form in six.iteritems(self.app_forms):
+                for k, v in six.iteritems(form.errors):
                     if k == NON_FIELD_ERRORS:
                         self._errors.setdefault(k, self.model_form.error_class()).extend(v)
                     else:

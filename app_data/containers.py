@@ -1,6 +1,7 @@
 from copy import copy
 
 from django.core.exceptions import ValidationError
+from django.utils import six
 
 from .registry import app_registry
 from .forms import AppDataForm
@@ -50,17 +51,17 @@ class AppDataContainerFactory(dict):
 
     def validate(self, model_instance):
         errors = {}
-        for key, value in self.items():
+        for key, value in six.iteritems(self):
             if hasattr(value, 'validate') and getattr(value, 'accessed', True):
                 try:
                     value.validate(self, model_instance)
-                except ValidationError, e:
+                except ValidationError as e:
                     errors[key] = e.message_dict
         if errors:
             raise ValidationError(errors)
 
     def serialize(self):
-        for key, value in self.items():
+        for key, value in six.iteritems(self):
             if hasattr(value, 'serialize') and getattr(value, 'accessed', True):
                 super(AppDataContainerFactory, self).__setitem__(key, value.serialize())
         # return a copy so that it's a fresh dict, not AppDataContainerFactory
@@ -177,7 +178,7 @@ class AppDataContainer(object):
             return default
 
     def update(self, data):
-        for k, v in data.iteritems():
+        for k, v in six.iteritems(data):
             self[k] = v
 
     def validate(self, app_data, model_instance):
@@ -188,7 +189,7 @@ class AppDataContainer(object):
 
     def serialize(self):
         " Go through attribute cache and use ._form to serialze those values into ._data. "
-        for name, value in self._attr_cache.iteritems():
+        for name, value in six.iteritems(self._attr_cache):
             f = self._form.fields[name]
             value = f.prepare_value(value)
             if hasattr(f.widget, '_format_value'):
