@@ -29,7 +29,7 @@ When you have an extendable django app using the `AppDataField`::
         app_data = AppDataField()
 
 your code can register a namespace on any (or all) `AppDataField` and store
-it's own data there byt registering a *container* (subclass of
+it's own data there by registering a *container* (subclass of
 `AppDataContainer`). To define the data you use django's form framework::
 
     from django.forms.models import ModelMultipleChoiceField
@@ -91,7 +91,7 @@ And when using that app any project can add additional sub-forms to that `MultiF
     BlogPostMultiForm.add_form('tagging', {'fields': ['public_tags']})
 
 This way when the reusable app's code can remain unchanged and we can inject
-additional form logic to it's processing.
+additional form logic to its processing.
 
 Additional Options
 ~~~~~~~~~~~~~~~~~~
@@ -103,13 +103,13 @@ for your `ModelForm` everything will still work::
     from django.forms.models import BaseModelForm
 
     class ModelFormWithUser(ModelForm):
-        def __init__(self, user, *wargs, **kwargs):
+        def __init__(self, user, *args, **kwargs):
             self.user = user
             super(ModelFormWithUser, self).__init__(*args, **kwargs)
 
     BlogPostMultiForm = multiform_factory(BlogPost, form=ModelFormWithUser)
 
-And of course you are not limitted to the use of a factory function::
+And of course you are not limited to the use of a factory function::
 
     from app_data import MultiForm
 
@@ -131,7 +131,7 @@ If you wish to add your own code to the admin interface, just use
         # declared_fieldsets instead of just fieldsets
         declared_fieldsets = [
             (None, {'fields': ['text', ]}),
-            ('Tagging': {'fields': [('tagging.public_tags', 'tagging.admin_tags')]})
+            ('Tagging', {'fields': [('tagging.public_tags', 'tagging.admin_tags')]})
         ]
     admin.site.register(BlogPost, BlogPostAdmin)
 
@@ -145,13 +145,13 @@ Behind the scenes
 *****************
 
 `django-appdata` uses a `TextField` to store the data on the model using JSON
-and django's forms framework for (de)serialization and validation of the data.
+and djangos forms framework for (de)serialization and validation of the data.
 
 When accessing the containers in the field we will try to locate the
 appropriate container in the registry. If none is found, plain data will be
-returned if present (dict). To assure everything working properly e recommend
-putting some sort of init code in place for your project that wil make sure all
-the registration is done before any actual code is run. We areusing a module
+returned if present (dict). To assure everything working properly we recommend
+putting some sort of init code in place for your project that will make sure all
+the registration is done before any actual code is run. We are using a module
 called `register` in our apps and then a `piece of code`_ similar to admin's
 autodiscover to iterate through installed apps and load this module.
 
