@@ -145,7 +145,7 @@ Behind the scenes
 *****************
 
 `django-appdata` uses a `TextField` to store the data on the model using JSON
-and djangos forms framework for (de)serialization and validation of the data.
+and django's forms framework for (de)serialization and validation of the data.
 
 When accessing the containers in the field we will try to locate the
 appropriate container in the registry. If none is found, plain data will be
