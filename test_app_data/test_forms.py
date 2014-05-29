@@ -158,7 +158,7 @@ class TestAppDataForms(AppDataTestCase):
         related_article = ModelChoiceField(queryset=Article.objects.all(), required=False)
 
     class MyOtherForm(AppDataForm):
-        categories = ListModelMultipleChoiceField(Category.objects.all())
+        categories = ListModelMultipleChoiceField(Category.objects.all(), required=False)
 
     def setUp(self):
         super(TestAppDataForms, self).setUp()
@@ -168,11 +168,16 @@ class TestAppDataForms(AppDataTestCase):
             'title': 'First!',
             'publish_from': '2010-10-1'
         }
+        MyOtherContainer = AppDataContainer.from_form(self.MyOtherForm)
+        app_registry.register('myotherapp', MyOtherContainer)
+
+    def test_empty_list_model_multiple_choice_field(self):
+        article = Article()
+        tools.assert_true(isinstance(article.app_data.myotherapp.categories, list))
+        tools.assert_equals([], article.app_data.myotherapp.categories)
 
     def test_list_model_multiple_choice_field(self):
         c1, c2 = Category.objects.create(), Category.objects.create()
-        MyOtherContainer = AppDataContainer.from_form(self.MyOtherForm)
-        app_registry.register('myotherapp', MyOtherContainer)
 
         article = Article()
         data = {'categories': [str(c1.pk), str(c2.pk)]}

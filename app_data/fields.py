@@ -82,6 +82,6 @@ class ListModelMultipleChoiceField(forms.ModelMultipleChoiceField):
     """
     def clean(self, value):
         value = super(ListModelMultipleChoiceField, self).clean(value)
-        return value and list(value) or value
+        return list(value)
 
 add_introspection_rules([], ["^app_data\.fields\.AppDataField"])
