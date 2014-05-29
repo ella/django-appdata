@@ -3,6 +3,7 @@ from datetime import date
 from django import forms
 from django.forms.models import ModelChoiceField, modelform_factory
 
+from app_data.fields import ListModelMultipleChoiceField
 from app_data.forms import multiform_factory, MultiForm, multiformset_factory
 from app_data.registry import app_registry
 from app_data.containers import AppDataContainer, AppDataForm
@@ -10,7 +11,7 @@ from app_data.containers import AppDataContainer, AppDataForm
 from nose import tools
 
 from .cases import AppDataTestCase
-from .models import Article
+from .models import Article, Category
 
 class TestMultiForm(AppDataTestCase):
     class MyMultiForm(MultiForm):
@@ -156,6 +157,9 @@ class TestAppDataForms(AppDataTestCase):
         publish_to = forms.DateField(required=False)
         related_article = ModelChoiceField(queryset=Article.objects.all(), required=False)
 
+    class MyOtherForm(AppDataForm):
+        categories = ListModelMultipleChoiceField(Category.objects.all())
+
     def setUp(self):
         super(TestAppDataForms, self).setUp()
         MyAppContainer = AppDataContainer.from_form(self.MyForm)
@@ -164,6 +168,21 @@ class TestAppDataForms(AppDataTestCase):
             'title': 'First!',
             'publish_from': '2010-10-1'
         }
+
+    def test_list_model_multiple_choice_field(self):
+        c1, c2 = Category.objects.create(), Category.objects.create()
+        MyOtherContainer = AppDataContainer.from_form(self.MyOtherForm)
+        app_registry.register('myotherapp', MyOtherContainer)
+
+        article = Article()
+        data = {'categories': [str(c1.pk), str(c2.pk)]}
+        form = article.app_data.myotherapp.get_form(data)
+        tools.assert_true(form.is_valid())
+        form.save()
+        article.save()
+        article = Article.objects.get(pk=article.pk)
+        tools.assert_true(isinstance(article.app_data.myotherapp.categories, list))
+        tools.assert_equals([c1, c2], article.app_data.myotherapp.categories)
 
     def test_instance_is_accessible_to_the_form(self):
         art = Article()
