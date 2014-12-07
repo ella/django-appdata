@@ -24,7 +24,7 @@ class AppDataContainerFactory(dict):
 
     def __getattr__(self, name):
         if name.startswith('_') or self._app_registry.get_class(name, self._model) is None:
-            raise AttributeError(name)
+            raise AttributeError('No Container registered under %s for class %s' % (name, self._model.__name__))
         return self[name]
 
     def __getitem__(self, name):
