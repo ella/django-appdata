@@ -4,8 +4,17 @@ old_config = None
 def setup():
     global test_runner
     global old_config
-    from django.test.simple import DjangoTestSuiteRunner
-    test_runner = DjangoTestSuiteRunner()
+    try:
+        # Django 1.7
+        from django.test.runner import DiscoverRunner
+        from django.apps import apps
+        from django.conf import settings
+        apps.populate(settings.INSTALLED_APPS)
+        test_runner = DiscoverRunner()
+    except ImportError:
+        from django.test.simple import DjangoTestSuiteRunner
+        test_runner = DjangoTestSuiteRunner()
+
     test_runner.setup_test_environment()
     old_config = test_runner.setup_databases()
 

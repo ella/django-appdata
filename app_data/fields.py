@@ -6,8 +6,6 @@ from django.db.models import TextField
 from django.utils.encoding import smart_text
 from django.utils import six
 
-from south.modelsinspector import add_introspection_rules
-
 from .registry import app_registry
 from .containers import AppDataContainerFactory
 
@@ -84,4 +82,10 @@ class ListModelMultipleChoiceField(forms.ModelMultipleChoiceField):
         value = super(ListModelMultipleChoiceField, self).clean(value)
         return list(value)
 
-add_introspection_rules([], ["^app_data\.fields\.AppDataField"])
+try:
+    from south.modelsinspector import add_introspection_rules
+except ImportError:
+    pass
+else:
+    add_introspection_rules([], ["^app_data\.fields\.AppDataField"])
+    # Django 1.7

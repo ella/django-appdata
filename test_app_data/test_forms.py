@@ -33,7 +33,7 @@ class TestMultiForm(AppDataTestCase):
         app_registry.register('myapp2', AppDataContainer.from_form(self.MyForm2))
 
     def test_multi_form_can_work_with_formsets(self):
-        FormSet = multiformset_factory(Article, form_opts={'myapp': {}})
+        FormSet = multiformset_factory(Article, form_opts={'myapp': {}}, exclude=())
         data = {
             'fs-TOTAL_FORMS': '1',
             'fs-INITIAL_FORMS': '0',
@@ -60,7 +60,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_multi_form_saves_all_the_forms(self):
-        MF = multiform_factory(Article, form_opts={'myapp': {}, 'myapp2': {}})
+        MF = multiform_factory(Article, form_opts={'myapp': {}, 'myapp2': {}}, exclude=())
         data = {
             'myapp-title': 'First',
             'myapp-publish_from': '2010-11-12',
@@ -84,7 +84,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_form_can_be_added_to_parent(self):
-        MF = multiform_factory(Article, multiform=self.MyMultiForm)
+        MF = multiform_factory(Article, multiform=self.MyMultiForm, exclude=())
         self.MyMultiForm.add_form('myapp', {})
         data = {
             'myapp-title': 'First',
@@ -107,7 +107,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_form_can_be_added(self):
-        MF = multiform_factory(Article)
+        MF = multiform_factory(Article, exclude=())
         MF.add_form('myapp', {})
         data = {
             'myapp-title': 'First',
@@ -130,7 +130,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_added_form_doesnt_appear_on_parent(self):
-        ArticleModelForm = modelform_factory(Article)
+        ArticleModelForm = modelform_factory(Article, exclude=())
         class MF(MultiForm):
             ModelForm = ArticleModelForm
         MF.add_form('myapp', {})
@@ -138,7 +138,7 @@ class TestMultiForm(AppDataTestCase):
         tools.assert_equals({}, MultiForm.app_form_opts)
 
     def test_form_can_be_removed(self):
-        MF = multiform_factory(Article, form_opts={'myapp': {}})
+        MF = multiform_factory(Article, form_opts={'myapp': {}}, exclude=())
         MF.remove_form('myapp')
         data = {
             'myapp-title': 'First',
