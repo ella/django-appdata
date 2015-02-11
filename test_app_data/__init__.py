@@ -7,9 +7,8 @@ def setup():
     try:
         # Django 1.7
         from django.test.runner import DiscoverRunner
-        from django.apps import apps
-        from django.conf import settings
-        apps.populate(settings.INSTALLED_APPS)
+        import django
+        django.setup()
         test_runner = DiscoverRunner()
     except ImportError:
         from django.test.simple import DjangoTestSuiteRunner
