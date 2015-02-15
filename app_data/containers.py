@@ -43,11 +43,8 @@ class AppDataContainerFactory(dict):
 
         return val
 
-    def __getstate__(self):
-        return self.serialize()
-
-    def __setstate__(self, state):
-        self.update(state)
+    def __reduce__(self):
+        return (dict, (self.serialize(), ))
 
     def validate(self, model_instance):
         errors = {}
@@ -62,8 +59,9 @@ class AppDataContainerFactory(dict):
 
     def serialize(self):
         for key, value in six.iteritems(self):
-            if hasattr(value, 'serialize') and getattr(value, 'accessed', True):
-                super(AppDataContainerFactory, self).__setitem__(key, value.serialize())
+            if isinstance(value, AppDataContainer):
+                value = value.serialize() if value.accessed else value._data
+                super(AppDataContainerFactory, self).__setitem__(key, value)
         # return a copy so that it's a fresh dict, not AppDataContainerFactory
         return self.copy()
 

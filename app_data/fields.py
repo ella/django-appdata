@@ -33,7 +33,7 @@ class AppDataDescriptor(Creator):
         if instance is None:
             raise AttributeError("%s must be accessed via instance" % self.field.name)
         if isinstance(value, dict) and not isinstance(value, AppDataContainerFactory):
-            value = AppDataContainerFactory(instance, value)
+            value = AppDataContainerFactory(instance, value, app_registry=self.field.app_registry)
         instance.__dict__[self.field.name] = value
 
 

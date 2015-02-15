@@ -93,6 +93,12 @@ class TestSerialization(AppDataTestCase):
         unpickled_article = pickle.loads(data)
         self._test_article(unpickled_article)
 
+    def test_pickle_supports_containers(self):
+        self.article.app_data.myapp
+        data = pickle.dumps(self.article)
+        unpickled_article = pickle.loads(data)
+        self._test_article(unpickled_article)
+
 class TestAppDataContainers(AppDataTestCase):
     def test_registered_classes_can_behave_as_attrs(self):
         app_registry.register('dummy', DummyAppDataContainer)
