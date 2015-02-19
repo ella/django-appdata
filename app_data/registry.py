@@ -1,3 +1,7 @@
+import copy_reg
+from app_data.containers import AppDataContainerFactory
+copy_reg.pickle(AppDataContainerFactory, lambda adcf: (dict, (adcf.serialize(), )))
+
 class NamespaceConflict(Exception):
     pass
 
