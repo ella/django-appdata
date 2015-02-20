@@ -1,10 +1,10 @@
+import json
+
 from django import forms
-from django.utils import simplejson as json
 from django.db.models.fields.subclassing import Creator
 from django.db.models import TextField
-from django.utils.encoding import smart_unicode
-
-from south.modelsinspector import add_introspection_rules
+from django.utils.encoding import smart_text
+from django.utils import six
 
 from .registry import app_registry
 from .containers import AppDataContainerFactory
@@ -17,23 +17,23 @@ class AppDataDescriptor(Creator):
 
         value = instance.__dict__[self.field.name]
 
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             value = json.loads(value)
 
         if isinstance(value, dict) and not isinstance(value, AppDataContainerFactory):
-            value = AppDataContainerFactory(instance, value)
+            value = AppDataContainerFactory(instance, value, app_registry=self.field.app_registry)
             instance.__dict__[self.field.name] = value
 
         value._instance = instance
         value._model = instance.__class__
-        value._app_registry = app_registry
+        value._app_registry = self.field.app_registry
         return value
 
     def __set__(self, instance, value):
         if instance is None:
             raise AttributeError("%s must be accessed via instance" % self.field.name)
         if isinstance(value, dict) and not isinstance(value, AppDataContainerFactory):
-            value = AppDataContainerFactory(instance, value)
+            value = AppDataContainerFactory(instance, value, app_registry=self.field.app_registry)
         instance.__dict__[self.field.name] = value
 
 
@@ -68,7 +68,7 @@ class AppDataField(TextField):
         if isinstance(value, dict):
             value = json.dumps(value)
 
-        return smart_unicode(value)
+        return smart_text(value)
 
 
 class ListModelMultipleChoiceField(forms.ModelMultipleChoiceField):
@@ -80,6 +80,12 @@ class ListModelMultipleChoiceField(forms.ModelMultipleChoiceField):
     """
     def clean(self, value):
         value = super(ListModelMultipleChoiceField, self).clean(value)
-        return value and list(value) or value
+        return list(value)
 
-add_introspection_rules([], ["^app_data\.fields\.AppDataField"])
+try:
+    from south.modelsinspector import add_introspection_rules
+except ImportError:
+    pass
+else:
+    add_introspection_rules([], ["^app_data\.fields\.AppDataField"])
+    # Django 1.7
