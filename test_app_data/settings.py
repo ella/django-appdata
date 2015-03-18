@@ -40,3 +40,5 @@ INSTALLED_APPS = (
 
     'test_app_data',
 )
+
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
