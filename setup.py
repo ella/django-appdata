@@ -2,7 +2,7 @@ from os.path import join, dirname
 from setuptools import setup
 
 
-VERSION = (0, 1, 2)
+VERSION = (0, 1, 3)
 __version__ = VERSION
 __versionstr__ = '.'.join(map(str, VERSION))
 
@@ -11,7 +11,7 @@ long_description = f.read().strip()
 f.close()
 
 install_requires = [
-    'Django',
+    'Django>=1.4.10',
     'south>=0.7',
 ]
 test_requires = [
@@ -34,10 +34,13 @@ setup(
     classifiers = [
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,
 
     test_suite='test_app_data.run_tests.run_all',
-    test_requires=test_requires,
+    tests_require=test_requires,
 )

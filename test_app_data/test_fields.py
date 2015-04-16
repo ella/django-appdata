@@ -7,7 +7,7 @@ from nose import tools
 from app_data.registry import NamespaceConflict, NamespaceMissing, app_registry
 from app_data.containers import AppDataContainer, AppDataForm
 
-from .models import Article, Publishable
+from .models import Article, Publishable, AlternateRegistryModel
 from .cases import AppDataTestCase
 
 try:
@@ -93,6 +93,12 @@ class TestSerialization(AppDataTestCase):
         unpickled_article = pickle.loads(data)
         self._test_article(unpickled_article)
 
+    def test_pickle_supports_containers(self):
+        self.article.app_data.myapp
+        data = pickle.dumps(self.article)
+        unpickled_article = pickle.loads(data)
+        self._test_article(unpickled_article)
+
 class TestAppDataContainers(AppDataTestCase):
     def test_registered_classes_can_behave_as_attrs(self):
         app_registry.register('dummy', DummyAppDataContainer)
@@ -151,5 +157,16 @@ class TestAppDataContainers(AppDataTestCase):
         data = inst.app_data.get('dummy', {})
         data['foo'] = 'bar'
         tools.assert_equals(data['foo'], 'bar')
-        tools.assert_equals(data.keys(), ['foo'])
-        tools.assert_equals(data.values(), ['bar'])
+        tools.assert_equals(list(data.keys()), ['foo'])
+        tools.assert_equals(list(data.values()), ['bar'])
+
+    def test_alternate_registry(self):
+        def _get_namespace(instance, namespace):
+            return getattr(instance, namespace)
+        alt = AlternateRegistryModel()
+        # only the "alternate" namespace should be in this model's registry
+        tools.assert_equals(alt.app_data.alternate.alternate_field, '')
+        tools.assert_raises(AttributeError, _get_namespace, alt, 'publish')
+        # and the "alternate" namespace shouldn't be in the global registry
+        inst = Publishable()
+        tools.assert_raises(AttributeError, _get_namespace, inst, 'alternate')

@@ -1,7 +1,13 @@
 from functools import partial
 
-from django.contrib.admin.util import flatten_fieldsets
+try:
+    # django 1.7
+    from django.contrib.admin.utils import flatten_fieldsets
+    from django.forms.models import modelform_defines_fields
+except ImportError:
+    from django.contrib.admin.util import flatten_fieldsets
 from django.contrib.admin.options import ModelAdmin, InlineModelAdmin
+from django import forms
 
 from app_data.forms import multiform_factory, multiinlineformset_factory, MultiForm
 
@@ -61,6 +67,12 @@ class AppDataAdminMixin(object):
             "formfield_callback": partial(self.formfield_for_dbfield, request=request),
         }
         defaults.update(kwargs)
+
+        if hasattr(forms, 'ALL_FIELDS'):
+            # Django 1.7
+            if defaults['fields'] is None and not modelform_defines_fields(defaults['form']):
+                defaults['fields'] = forms.ALL_FIELDS
+
         return defaults
 
 

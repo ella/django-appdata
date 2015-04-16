@@ -3,6 +3,7 @@ from datetime import date
 from django import forms
 from django.forms.models import ModelChoiceField, modelform_factory
 
+from app_data.fields import ListModelMultipleChoiceField
 from app_data.forms import multiform_factory, MultiForm, multiformset_factory
 from app_data.registry import app_registry
 from app_data.containers import AppDataContainer, AppDataForm
@@ -10,7 +11,7 @@ from app_data.containers import AppDataContainer, AppDataForm
 from nose import tools
 
 from .cases import AppDataTestCase
-from .models import Article
+from .models import Article, Category
 
 class TestMultiForm(AppDataTestCase):
     class MyMultiForm(MultiForm):
@@ -32,7 +33,7 @@ class TestMultiForm(AppDataTestCase):
         app_registry.register('myapp2', AppDataContainer.from_form(self.MyForm2))
 
     def test_multi_form_can_work_with_formsets(self):
-        FormSet = multiformset_factory(Article, form_opts={'myapp': {}})
+        FormSet = multiformset_factory(Article, form_opts={'myapp': {}}, exclude=())
         data = {
             'fs-TOTAL_FORMS': '1',
             'fs-INITIAL_FORMS': '0',
@@ -59,7 +60,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_multi_form_saves_all_the_forms(self):
-        MF = multiform_factory(Article, form_opts={'myapp': {}, 'myapp2': {}})
+        MF = multiform_factory(Article, form_opts={'myapp': {}, 'myapp2': {}}, exclude=())
         data = {
             'myapp-title': 'First',
             'myapp-publish_from': '2010-11-12',
@@ -83,7 +84,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_form_can_be_added_to_parent(self):
-        MF = multiform_factory(Article, multiform=self.MyMultiForm)
+        MF = multiform_factory(Article, multiform=self.MyMultiForm, exclude=())
         self.MyMultiForm.add_form('myapp', {})
         data = {
             'myapp-title': 'First',
@@ -106,7 +107,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_form_can_be_added(self):
-        MF = multiform_factory(Article)
+        MF = multiform_factory(Article, exclude=())
         MF.add_form('myapp', {})
         data = {
             'myapp-title': 'First',
@@ -129,7 +130,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_added_form_doesnt_appear_on_parent(self):
-        ArticleModelForm = modelform_factory(Article)
+        ArticleModelForm = modelform_factory(Article, exclude=())
         class MF(MultiForm):
             ModelForm = ArticleModelForm
         MF.add_form('myapp', {})
@@ -137,7 +138,7 @@ class TestMultiForm(AppDataTestCase):
         tools.assert_equals({}, MultiForm.app_form_opts)
 
     def test_form_can_be_removed(self):
-        MF = multiform_factory(Article, form_opts={'myapp': {}})
+        MF = multiform_factory(Article, form_opts={'myapp': {}}, exclude=())
         MF.remove_form('myapp')
         data = {
             'myapp-title': 'First',
@@ -156,6 +157,9 @@ class TestAppDataForms(AppDataTestCase):
         publish_to = forms.DateField(required=False)
         related_article = ModelChoiceField(queryset=Article.objects.all(), required=False)
 
+    class MyOtherForm(AppDataForm):
+        categories = ListModelMultipleChoiceField(Category.objects.all(), required=False)
+
     def setUp(self):
         super(TestAppDataForms, self).setUp()
         MyAppContainer = AppDataContainer.from_form(self.MyForm)
@@ -164,6 +168,26 @@ class TestAppDataForms(AppDataTestCase):
             'title': 'First!',
             'publish_from': '2010-10-1'
         }
+        MyOtherContainer = AppDataContainer.from_form(self.MyOtherForm)
+        app_registry.register('myotherapp', MyOtherContainer)
+
+    def test_empty_list_model_multiple_choice_field(self):
+        article = Article()
+        tools.assert_true(isinstance(article.app_data.myotherapp.categories, list))
+        tools.assert_equals([], article.app_data.myotherapp.categories)
+
+    def test_list_model_multiple_choice_field(self):
+        c1, c2 = Category.objects.create(), Category.objects.create()
+
+        article = Article()
+        data = {'categories': [str(c1.pk), str(c2.pk)]}
+        form = article.app_data.myotherapp.get_form(data)
+        tools.assert_true(form.is_valid())
+        form.save()
+        article.save()
+        article = Article.objects.get(pk=article.pk)
+        tools.assert_true(isinstance(article.app_data.myotherapp.categories, list))
+        tools.assert_equals([c1, c2], article.app_data.myotherapp.categories)
 
     def test_instance_is_accessible_to_the_form(self):
         art = Article()
@@ -206,5 +230,6 @@ class TestAppDataForms(AppDataTestCase):
 
         article.save()
         article = Article.objects.get(pk=article.pk)
-        tools.assert_equals({u'title': u'First!'}, article.app_data.myapp._data)
+        tools.assert_equals('First!', article.app_data.myapp._data['title'])
+        tools.assert_false('publish_from' in article.app_data.myapp._data)
 
