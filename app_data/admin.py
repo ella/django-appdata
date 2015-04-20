@@ -2,12 +2,12 @@ from functools import partial
 
 try:
     # django 1.7
-    from django.forms.models import modelform_defines_fields
     from django.contrib.admin.utils import flatten_fieldsets
 except ImportError:
     from django.contrib.admin.util import flatten_fieldsets
 from django.contrib.admin.options import ModelAdmin, InlineModelAdmin
 from django import forms
+from django.forms.models import modelform_defines_fields
 
 from app_data.forms import multiform_factory, multiinlineformset_factory, MultiForm
 
