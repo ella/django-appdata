@@ -12,7 +12,6 @@ f.close()
 
 install_requires = [
     'Django>=1.4.10',
-    'south>=0.7',
 ]
 test_requires = [
     'nose',
