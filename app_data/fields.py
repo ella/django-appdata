@@ -40,7 +40,7 @@ class AppDataDescriptor(Creator):
 class AppDataField(TextField):
     def __init__(self, *args, **kwargs):
         self.app_registry = kwargs.pop('app_registry', app_registry)
-        kwargs.setdefault('default', '{}')
+        kwargs.setdefault('default', dict)
         kwargs.setdefault('editable', False)
         super(AppDataField, self).__init__(*args, **kwargs)
 
