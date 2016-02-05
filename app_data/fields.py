@@ -1,7 +1,6 @@
 import json
 
 from django import forms
-from django.db.models.fields.subclassing import Creator
 from django.db.models import TextField
 from django.utils.encoding import smart_text
 from django.utils import six
@@ -9,8 +8,13 @@ from django.utils import six
 from .registry import app_registry
 from .containers import AppDataContainerFactory
 
-class AppDataDescriptor(Creator):
+
+class AppDataDescriptor(object):
     "Ensure the user attribute is accessible via the profile"
+
+    def __init__(self, field):
+        self.field = field
+
     def __get__(self, instance, instance_type=None):
         if instance is None:
             return self
