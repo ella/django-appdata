@@ -21,7 +21,7 @@ list_of_urls = [
     url(r'^admin/', include(site.urls))
 ]
 
-if django.VERSION > (1.8):
+if django.VERSION > (1, 8):
     urlpatterns = list_of_urls
 else:
     urlpatterns = patterns('', *list_of_urls)
