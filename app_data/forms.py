@@ -15,7 +15,7 @@ class AppDataForm(Form):
         super(AppDataForm, self).__init__(data, files, **kwargs)
 
         if fields or exclude:
-            for f in self.fields.keys():
+            for f in list(self.fields.keys()):
                 if fields and f not in fields:
                     del self.fields[f]
                 elif f in exclude:
