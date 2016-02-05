@@ -1,5 +1,15 @@
+from os import environ
+import django
+
+environ['DJANGO_SETTINGS_MODULE'] = 'test_app_data.settings'
+
 test_runner = None
 old_config = None
+
+try:
+    django.setup()
+except AttributeError:
+    pass
 
 def setup():
     global test_runner
@@ -7,8 +17,6 @@ def setup():
     try:
         # Django 1.7
         from django.test.runner import DiscoverRunner
-        import django
-        django.setup()
         test_runner = DiscoverRunner()
     except ImportError:
         from django.test.simple import DjangoTestSuiteRunner

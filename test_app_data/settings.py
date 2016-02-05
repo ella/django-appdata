@@ -8,13 +8,17 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.debug',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.core.context_processors.request',
-    'django.contrib.auth.context_processors.auth',
-)
+TEMPLATE_OPTIONS = {
+    'context_processors': [],
+    'loaders': TEMPLATE_LOADERS,
+}
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'OPTIONS': TEMPLATE_OPTIONS
+    },
+]
 
 SECRET_KEY = 'very-secret'
 
