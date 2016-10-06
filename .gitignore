@@ -6,3 +6,4 @@ django_appdata.egg-info
 *.egg
 build
 dist
+.eggs
