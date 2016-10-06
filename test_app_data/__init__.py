@@ -10,7 +10,7 @@ def setup():
         import django
         django.setup()
         test_runner = DiscoverRunner()
-    except ImportError:
+    except (ImportError, AttributeError):
         from django.test.simple import DjangoTestSuiteRunner
         test_runner = DjangoTestSuiteRunner()
 
