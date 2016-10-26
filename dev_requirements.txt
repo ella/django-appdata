@@ -3,3 +3,4 @@
 nose
 coverage
 
+south>=0.7
