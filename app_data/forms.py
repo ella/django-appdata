@@ -1,11 +1,10 @@
-try:
-    from operator import methodcaller
-except ImportError:
-    methodcaller = lambda name: lambda o: getattr(o, name)()
+from operator import methodcaller
+from copy import deepcopy
 
 from django.forms.forms import NON_FIELD_ERRORS, Form
 from django.forms.formsets import formset_factory
 from django.forms.models import modelform_factory, _get_foreign_key, BaseInlineFormSet, BaseModelFormSet
+from django.forms.utils import pretty_name
 from django.utils.safestring import mark_safe
 from django.utils import six
 
@@ -29,7 +28,7 @@ class AppDataForm(Form):
         self.app_container.update(self.cleaned_data)
 
 class BaseFieldsDescriptor(object):
-    " Combines the base_fiels and prefixes them properly. Descriptor because needed on class level. "
+    " Combines the base_fields and prefixes them properly. Descriptor because needed on class level. "
     def __get__(self, instance, owner):
 
         if not hasattr(self, '_base_fields'):
@@ -88,7 +87,7 @@ class MultiForm(object):
 
     @classmethod
     def get_app_form_opts(cls):
-        " Utility method to combinte app_form_opts from all base classes. "
+        " Utility method to combine app_form_opts from all base classes. "
         # subclass may wish to remove superclass's app_form
         skip_labels = set()
 
@@ -114,13 +113,13 @@ class MultiForm(object):
 
     @classmethod
     def add_form(cls, label, form_options={}):
-        " Add an app_data form to the multi form after it's creation. "
+        " Add an app_data form to the multi form after its creation. "
         cls.app_form_opts[label] = form_options.copy()
 
     @classmethod
     def remove_form(cls, label):
         """
-        Remove an app_data form to the multi form after it's creation.
+        Remove an app_data form to the multi form after its creation.
         Even if this form would be specified in a superclass it would be skipped.
         """
         cls.app_form_opts[label] = None
