@@ -6,6 +6,8 @@ from django.forms.formsets import formset_factory
 from django.forms.models import modelform_factory, _get_foreign_key, BaseInlineFormSet, BaseModelFormSet
 from django.utils.safestring import mark_safe
 from django.utils import six
+from django.utils.six import with_metaclass
+
 
 try:
     from django.forms.utils import pretty_name
@@ -72,7 +74,15 @@ class AppFormOptsDescriptor(object):
             setattr(owner, '_app_form_opts', {})
         return owner._app_form_opts
 
-class MultiForm(object):
+class MultiFormMetaclass(type):
+    # This property is needed by BaseInlineFormSet which expect the form *class* to have a "real" _meta
+    # and thus the proxing in the instance property won't work
+    @property
+    def _meta(cls):
+        return cls.ModelForm._meta
+
+
+class MultiForm(with_metaclass(MultiFormMetaclass, object)):
     app_data_field = 'app_data'
     app_form_opts = AppFormOptsDescriptor()
 
