@@ -91,9 +91,11 @@ class AppDataModelAdmin(AppDataAdminMixin, ModelAdmin):
         return multiform_factory(self.model, **self._get_form_factory_opts(request, obj, **kwargs))
 
 class AppDataInlineModelAdmin(AppDataAdminMixin, InlineModelAdmin):
+    formset = AppDataBaseInlineFormSet
+
     def get_formset(self, request, obj=None, **kwargs):
         if self.multiform is None:
-            return super(AppDataModelAdmin, self).get_formset(request, obj=obj, **kwargs)
+            return super(AppDataInlineModelAdmin, self).get_formset(request, obj=obj, **kwargs)
         can_delete = self.can_delete
         if hasattr(self, 'has_delete_permission'):
             can_delete = can_delete and self.has_delete_permission(request, obj)

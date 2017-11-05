@@ -4,9 +4,18 @@ from copy import deepcopy
 from django.forms.forms import NON_FIELD_ERRORS, Form
 from django.forms.formsets import formset_factory
 from django.forms.models import modelform_factory, _get_foreign_key, BaseInlineFormSet, BaseModelFormSet
-from django.forms.utils import pretty_name
 from django.utils.safestring import mark_safe
 from django.utils import six
+
+try:
+    from django.forms.utils import pretty_name
+except ImportError:
+    def pretty_name(name):
+        """Converts 'first_name' to 'First name'"""
+        if not name:
+            return ''
+        return name.replace('_', ' ').capitalize()
+
 
 class AppDataForm(Form):
     def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
@@ -242,6 +251,17 @@ class MultiForm(object):
         # save the model itself
         return self.model_form.save(**kwargs)
 
+class AppDataBaseInlineFormSet(BaseInlineFormSet):
+
+    def add_fields(self, form, index):
+        """appcontainer fields are no longer added to the empty form, we can inject them hooking here."""
+        super(AppDataBaseInlineFormSet, self).add_fields(form, index)
+        for name, field in form.base_fields.items():
+            if name not in form.fields:
+                form.fields[name] = deepcopy(field)
+                if not form.fields[name].label:
+                    form.fields[name].label = pretty_name(name.split('.')[1])
+
 
 def multiform_factory(model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={}, **kwargs):
     model_form = modelform_factory(model, **kwargs)
@@ -264,7 +284,6 @@ def multiinlineformset_factory(parent_model, model, multiform=MultiForm, app_dat
     fk = _get_foreign_key(parent_model, model, fk_name=fk_name)
     if fk.unique:
         kwargs['max_num'] = 1
-
     FormSet = multiformset_factory(model, multiform, app_data_field, name, form_opts, formset=formset, **kwargs)
     FormSet.fk = fk
     return FormSet
