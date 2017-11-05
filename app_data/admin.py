@@ -13,9 +13,16 @@ class AppDataAdminMixin(object):
     multiform = MultiForm
     app_form_opts = {}
 
+    def get_fieldsets(self, request, obj=None):
+        try:
+            return self.declared_fieldsets
+        except AttributeError:
+            return super(AppDataAdminMixin, self).get_fieldsets(request, obj)
+
     def _get_form_factory_opts(self, request, obj=None, **kwargs):
-        if self.declared_fieldsets:
-            fields = flatten_fieldsets(self.declared_fieldsets)
+        fieldsets = self.get_fieldsets(request, obj)
+        if fieldsets:
+            fields = flatten_fieldsets(fieldsets)
         else:
             fields = None
         if self.exclude is None:

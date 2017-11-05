@@ -127,12 +127,13 @@ If you wish to add your own code to the admin interface, just use
     from blog_app.models import BlogPost
 
     class BlogPostAdmin(AppDataModelAdmin):
-        # due to bug in django's admin validation we need to use
-        # declared_fieldsets instead of just fieldsets
-        declared_fieldsets = [
-            (None, {'fields': ['text', ]}),
-            ('Tagging', {'fields': [('tagging.public_tags', 'tagging.admin_tags')]})
-        ]
+        # due to the behavior of django admin validation we need to use
+        # get_fieldsets instead of just fieldsets
+        def get_fieldsets(self, request, obj=None):
+             return [
+                 (None, {'fields': ['text', ]}),
+                 ('Tagging', {'fields': [('tagging.public_tags', 'tagging.admin_tags')]})
+             ]
     admin.site.register(BlogPost, BlogPostAdmin)
 
 Additional Options
