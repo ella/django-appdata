@@ -16,6 +16,22 @@ leads to some duplication of efforts.
 `django-appdata` app tries, through `AppDataField`, `MultiForm` and `AppDataModelAdmin`,
 to provide a standardised approach to extending existing apps.
 
+Supported versions
+******************
+
+Python: 2.7, 3.4, 3.5, 3.6
+Django: 1.8, 1.9, 1.10, 1.11
+
+Upgrading to 0.2
+****************
+
+If you are upgrading from a 0.1.x version, please note the following incompatible changes in 0.2
+
+* Dropped Django < 1.8 and Python 2.6 / 3.3 compatibility
+* Dropped support for `ModelAdmin.declared_fieldsets` attribute, use `ModelAdmin.get_fieldsets` method  as documented
+  below
+
+
 Extending Models
 ****************
 
@@ -127,12 +143,13 @@ If you wish to add your own code to the admin interface, just use
     from blog_app.models import BlogPost
 
     class BlogPostAdmin(AppDataModelAdmin):
-        # due to bug in django's admin validation we need to use
-        # declared_fieldsets instead of just fieldsets
-        declared_fieldsets = [
-            (None, {'fields': ['text', ]}),
-            ('Tagging', {'fields': [('tagging.public_tags', 'tagging.admin_tags')]})
-        ]
+        # due to the behavior of django admin validation we need to use
+        # get_fieldsets instead of just fieldsets
+        def get_fieldsets(self, request, obj=None):
+             return [
+                 (None, {'fields': ['text', ]}),
+                 ('Tagging', {'fields': [('tagging.public_tags', 'tagging.admin_tags')]})
+             ]
     admin.site.register(BlogPost, BlogPostAdmin)
 
 Additional Options

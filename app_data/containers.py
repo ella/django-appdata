@@ -190,8 +190,18 @@ class AppDataContainer(object):
         for name, value in six.iteritems(self._attr_cache):
             f = self._form.fields[name]
             value = f.prepare_value(value)
-            if hasattr(f.widget, '_format_value'):
-                value = f.widget._format_value(value)
+            # Widget.format_value in 1.11 has a different semantic than Widget._format_value in previous versions
+            # in case the value is *exactly* True / False / None returns None
+            # To handle this we pick the formatted value *only if* both formatted and original values evaluates to true
+            # Choices fields must not be formatted because we need the python value, not the formatted one
+            new_value = None
+            if not hasattr(f, 'choices'):
+                if hasattr(f.widget, 'format_value'):
+                    new_value = f.widget.format_value(value)
+                elif hasattr(f.widget, '_format_value'):
+                    new_value = f.widget._format_value(value)
+            if value and new_value:
+                value = new_value
             self._data[name] = value
         return self._data
 

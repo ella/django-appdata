@@ -9,7 +9,9 @@ TEMPLATE_LOADERS = (
 )
 
 TEMPLATE_OPTIONS = {
-    'context_processors': [],
+    'context_processors': [
+        'django.contrib.auth.context_processors.auth'
+    ],
     'loaders': TEMPLATE_LOADERS,
 }
 

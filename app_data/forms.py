@@ -1,13 +1,19 @@
-try:
-    from operator import methodcaller
-except ImportError:
-    methodcaller = lambda name: lambda o: getattr(o, name)()
+from operator import methodcaller
+from copy import deepcopy
 
 from django.forms.forms import NON_FIELD_ERRORS, Form
 from django.forms.formsets import formset_factory
 from django.forms.models import modelform_factory, _get_foreign_key, BaseInlineFormSet, BaseModelFormSet
 from django.utils.safestring import mark_safe
 from django.utils import six
+from django.utils.six import with_metaclass
+
+
+try:
+    from django.forms.utils import pretty_name
+except ImportError:
+    from django.forms.forms import pretty_name  # COMPAT: Django==1.8
+
 
 class AppDataForm(Form):
     def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
@@ -29,7 +35,7 @@ class AppDataForm(Form):
         self.app_container.update(self.cleaned_data)
 
 class BaseFieldsDescriptor(object):
-    " Combines the base_fiels and prefixes them properly. Descriptor because needed on class level. "
+    " Combines the base_fields and prefixes them properly. Descriptor because needed on class level. "
     def __get__(self, instance, owner):
 
         if not hasattr(self, '_base_fields'):
@@ -64,7 +70,15 @@ class AppFormOptsDescriptor(object):
             setattr(owner, '_app_form_opts', {})
         return owner._app_form_opts
 
-class MultiForm(object):
+class MultiFormMetaclass(type):
+    # This property is needed by BaseInlineFormSet which expect the form *class* to have a "real" _meta
+    # and thus the proxing in the instance property won't work
+    @property
+    def _meta(cls):
+        return cls.ModelForm._meta
+
+
+class MultiForm(with_metaclass(MultiFormMetaclass, object)):
     app_data_field = 'app_data'
     app_form_opts = AppFormOptsDescriptor()
 
@@ -88,7 +102,7 @@ class MultiForm(object):
 
     @classmethod
     def get_app_form_opts(cls):
-        " Utility method to combinte app_form_opts from all base classes. "
+        " Utility method to combine app_form_opts from all base classes. "
         # subclass may wish to remove superclass's app_form
         skip_labels = set()
 
@@ -114,13 +128,13 @@ class MultiForm(object):
 
     @classmethod
     def add_form(cls, label, form_options={}):
-        " Add an app_data form to the multi form after it's creation. "
+        " Add an app_data form to the multi form after its creation. "
         cls.app_form_opts[label] = form_options.copy()
 
     @classmethod
     def remove_form(cls, label):
         """
-        Remove an app_data form to the multi form after it's creation.
+        Remove an app_data form to the multi form after its creation.
         Even if this form would be specified in a superclass it would be skipped.
         """
         cls.app_form_opts[label] = None
@@ -243,6 +257,17 @@ class MultiForm(object):
         # save the model itself
         return self.model_form.save(**kwargs)
 
+class AppDataBaseInlineFormSet(BaseInlineFormSet):
+
+    def add_fields(self, form, index):
+        """appcontainer fields are no longer added to the empty form, we can inject them hooking here."""
+        super(AppDataBaseInlineFormSet, self).add_fields(form, index)
+        for name, field in form.base_fields.items():
+            if name not in form.fields:
+                form.fields[name] = deepcopy(field)
+                if not form.fields[name].label:
+                    form.fields[name].label = pretty_name(name.split('.')[1])
+
 
 def multiform_factory(model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={}, **kwargs):
     model_form = modelform_factory(model, **kwargs)
@@ -265,7 +290,6 @@ def multiinlineformset_factory(parent_model, model, multiform=MultiForm, app_dat
     fk = _get_foreign_key(parent_model, model, fk_name=fk_name)
     if fk.unique:
         kwargs['max_num'] = 1
-
     FormSet = multiformset_factory(model, multiform, app_data_field, name, form_opts, formset=formset, **kwargs)
     FormSet.fk = fk
     return FormSet

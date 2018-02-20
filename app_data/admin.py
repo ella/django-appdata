@@ -1,24 +1,11 @@
 from functools import partial
 
-try:
-    # django 1.7
-    from django.contrib.admin.utils import flatten_fieldsets
-except ImportError:
-    from django.contrib.admin.util import flatten_fieldsets
+from django.contrib.admin.utils import flatten_fieldsets
 from django.contrib.admin.options import ModelAdmin, InlineModelAdmin
 from django import forms
+from django.forms.models import modelform_defines_fields
 
-from app_data.forms import multiform_factory, multiinlineformset_factory, MultiForm
-
-try:
-    from django.forms.models import modelform_defines_fields
-except ImportError:  # django < 1.6
-    def modelform_defines_fields(form_class):
-        return (form_class is not None and (
-                hasattr(form_class, '_meta') and
-                (form_class._meta.fields is not None or
-                form_class._meta.exclude is not None)
-                ))
+from app_data.forms import multiform_factory, multiinlineformset_factory, MultiForm, AppDataBaseInlineFormSet
 
 
 class AppDataAdminMixin(object):
@@ -26,9 +13,16 @@ class AppDataAdminMixin(object):
     multiform = MultiForm
     app_form_opts = {}
 
+    def get_fieldsets(self, request, obj=None):
+        try:
+            return self.declared_fieldsets
+        except AttributeError:
+            return super(AppDataAdminMixin, self).get_fieldsets(request, obj)
+
     def _get_form_factory_opts(self, request, obj=None, **kwargs):
-        if self.declared_fieldsets:
-            fields = flatten_fieldsets(self.declared_fieldsets)
+        fieldsets = self.get_fieldsets(request, obj)
+        if fieldsets:
+            fields = flatten_fieldsets(fieldsets)
         else:
             fields = None
         if self.exclude is None:
@@ -97,9 +91,11 @@ class AppDataModelAdmin(AppDataAdminMixin, ModelAdmin):
         return multiform_factory(self.model, **self._get_form_factory_opts(request, obj, **kwargs))
 
 class AppDataInlineModelAdmin(AppDataAdminMixin, InlineModelAdmin):
+    formset = AppDataBaseInlineFormSet
+
     def get_formset(self, request, obj=None, **kwargs):
         if self.multiform is None:
-            return super(AppDataModelAdmin, self).get_formset(request, obj=obj, **kwargs)
+            return super(AppDataInlineModelAdmin, self).get_formset(request, obj=obj, **kwargs)
         can_delete = self.can_delete
         if hasattr(self, 'has_delete_permission'):
             can_delete = can_delete and self.has_delete_permission(request, obj)
