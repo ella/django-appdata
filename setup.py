@@ -1,6 +1,6 @@
 from os.path import join, dirname
-from setuptools import setup
 
+from setuptools import setup
 
 VERSION = (0, 1, 6)
 __version__ = VERSION
@@ -19,27 +19,27 @@ test_requires = [
 ]
 
 setup(
-    name = 'django-appdata',
-    description = "Extandable field that enables Django apps to store their data on your models.",
-    url = "https://github.com/ella/django-appdata/",
-    long_description = long_description,
-    version = __versionstr__,
-    author = 'Ella Development Team',
-    author_email = 'dev@ellaproject.cz',
+    name='django-appdata',
+    description='Extendable field that enables Django apps to store their data on your models.',
+    url='https://github.com/ella/django-appdata/',
+    long_description=long_description,
+    version=__versionstr__,
+    author='Ella Development Team',
+    author_email='dev@ellaproject.cz',
     license='BSD',
-    packages = ['app_data'],
-    zip_safe = False,
-    include_package_data = True,
-    classifiers = [
-        "Development Status :: 4 - Beta",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Operating System :: OS Independent",
+    packages=['app_data'],
+    zip_safe=False,
+    include_package_data=True,
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Operating System :: OS Independent',
     ],
     install_requires=install_requires,
 
