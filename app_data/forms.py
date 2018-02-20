@@ -12,11 +12,7 @@ from django.utils.six import with_metaclass
 try:
     from django.forms.utils import pretty_name
 except ImportError:
-    def pretty_name(name):
-        """Converts 'first_name' to 'First name'"""
-        if not name:
-            return ''
-        return name.replace('_', ' ').capitalize()
+    from django.forms.forms import pretty_name  # COMPAT: Django==1.8
 
 
 class AppDataForm(Form):

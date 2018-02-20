@@ -6,16 +6,15 @@ environ['DJANGO_SETTINGS_MODULE'] = 'test_app_data.settings'
 
 test_runner = None
 old_config = None
-if LooseVersion(django.get_version()) >= LooseVersion('1.9'):
-    django.setup()
+
+django.setup()
+
 
 def setup():
     from django.test.runner import DiscoverRunner
     global test_runner
     global old_config
 
-    if LooseVersion(django.get_version()) < LooseVersion('1.9'):
-        django.setup()
     test_runner = DiscoverRunner()
 
     test_runner.setup_test_environment()
