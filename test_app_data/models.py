@@ -3,22 +3,28 @@ from django.db import models
 
 from app_data import AppDataField, AppDataContainer, AppDataForm, NamespaceRegistry, app_registry
 
+
 class Category(models.Model):
     app_data = AppDataField()
+
 
 class Publishable(models.Model):
     app_data = AppDataField()
 
+
 class Article(Publishable):
     pass
 
+
 class Author(models.Model):
-    publishable = models.ForeignKey(Publishable)
+    publishable = models.ForeignKey(Publishable, on_delete=models.CASCADE)
     app_data = AppDataField()
+
 
 class AlternateRegistryModel(models.Model):
     alternate_registry = NamespaceRegistry()
     app_data = AppDataField(app_registry=alternate_registry)
+
 
 class PublishAppForm(AppDataForm):
     publish_from = forms.DateTimeField()

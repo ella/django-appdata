@@ -3,6 +3,7 @@ from django.conf import settings
 
 from app_data.registry import app_registry
 
+
 class AppDataTestCase(TestCase):
     def setUp(self):
         super(AppDataTestCase, self).setUp()

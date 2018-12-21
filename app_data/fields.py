@@ -10,7 +10,7 @@ from .containers import AppDataContainerFactory
 
 
 class AppDataDescriptor(object):
-    "Ensure the user attribute is accessible via the profile"
+    """Ensure the user attribute is accessible via the profile"""
 
     def __init__(self, field):
         self.field = field
@@ -48,7 +48,7 @@ class AppDataField(TextField):
         kwargs.setdefault('editable', False)
         super(AppDataField, self).__init__(*args, **kwargs)
 
-    def contribute_to_class(self, cls, name):
+    def contribute_to_class(self, cls, name, **kwargs):
         super(AppDataField, self).contribute_to_class(cls, name)
         setattr(cls, name, AppDataDescriptor(self))
 
@@ -65,7 +65,7 @@ class AppDataField(TextField):
         value.validate(model_instance)
 
     def value_to_string(self, obj):
-        value = self._get_val_from_obj(obj)
+        value = self.value_from_object(obj)
 
         if isinstance(value, AppDataContainerFactory):
             value = value.serialize()

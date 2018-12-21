@@ -81,14 +81,15 @@ class AppDataAdminMixin(object):
 
 
 class AppDataModelAdmin(AppDataAdminMixin, ModelAdmin):
-    def get_form(self, request, obj=None, **kwargs):
+    def get_form(self, request, obj=None, change=False, **kwargs):
         """
         Returns a Form class for use in the admin add view. This is used by
         add_view and change_view.
         """
         if self.multiform is None:
-            return super(AppDataModelAdmin, self).get_form(request, obj=obj, **kwargs)
+            return super(AppDataModelAdmin, self).get_form(request, obj=obj, change=change, **kwargs)
         return multiform_factory(self.model, **self._get_form_factory_opts(request, obj, **kwargs))
+
 
 class AppDataInlineModelAdmin(AppDataAdminMixin, InlineModelAdmin):
     formset = AppDataBaseInlineFormSet
@@ -107,11 +108,12 @@ class AppDataInlineModelAdmin(AppDataAdminMixin, InlineModelAdmin):
             "can_delete": can_delete,
         }
         defaults.update(self._get_form_factory_opts(request, obj, **kwargs))
-
         return multiinlineformset_factory(self.parent_model, self.model, **defaults)
+
 
 class AppDataStackedInline(AppDataInlineModelAdmin):
     template = 'admin/edit_inline/stacked.html'
+
 
 class AppDataTabularInline(AppDataInlineModelAdmin):
     template = 'admin/edit_inline/tabular.html'

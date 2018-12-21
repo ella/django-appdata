@@ -6,6 +6,7 @@ from django.utils import six
 from .registry import app_registry
 from .forms import AppDataForm
 
+
 class AppDataContainerFactory(dict):
     def __init__(self, model_instance, *args, **kwargs):
         self._model = model_instance.__class__
@@ -81,6 +82,7 @@ class AppDataContainerFactory(dict):
 
 INITIAL = object()
 
+
 class AppDataContainer(object):
     form_class = AppDataForm
 
@@ -90,7 +92,7 @@ class AppDataContainer(object):
 
     @property
     def accessed(self):
-        " Return a boolean indicating whether the data have been accessed. "
+        """Return a boolean indicating whether the data have been accessed."""
         return self._accessed
 
     def __init__(self, model_instance, *args, **kwargs):
@@ -111,7 +113,7 @@ class AppDataContainer(object):
 
     @property
     def _form(self):
-        " Form instance used to clean/(de)serialize field values. "
+        """Form instance used to clean/(de)serialize field values."""
         if not hasattr(self, '_form_instance'):
             self._form_instance = self.get_form()
         return self._form_instance
@@ -127,7 +129,7 @@ class AppDataContainer(object):
             self._data[name] = value
 
     def __setattr__(self, name, value):
-        " Provide access to fields as attributes. "
+        """Provide access to fields as attributes."""
         if name.startswith('_'):
             super(AppDataContainer, self).__setattr__(name, value)
         else:
@@ -152,7 +154,7 @@ class AppDataContainer(object):
         return self._data[name]
 
     def __getattr__(self, name):
-        " Provide access to fields as attributes. "
+        """Provide access to fields as attributes."""
         if name.startswith('_'):
             raise AttributeError(name)
         try:
@@ -167,7 +169,7 @@ class AppDataContainer(object):
         del self._data[name]
 
     def get(self, name, default=INITIAL):
-        " Mimic dict's get with the exception of returning the inital value for defined fields "
+        """Mimic dict's get with the exception of returning the inital value for defined fields"""
         try:
             return self[name]
         except KeyError:
@@ -186,7 +188,7 @@ class AppDataContainer(object):
             raise ValidationError(form.errors)
 
     def serialize(self):
-        " Go through attribute cache and use ._form to serialze those values into ._data. "
+        """Go through attribute cache and use ._form to serialze those values into ._data."""
         for name, value in six.iteritems(self._attr_cache):
             f = self._form.fields[name]
             value = f.prepare_value(value)
@@ -206,6 +208,6 @@ class AppDataContainer(object):
         return self._data
 
     def get_form(self, data=None, files=None, fields=(), exclude=(), form_class=None, **kwargs):
-        " Contrsuct a form for this "
+        """Construct a form for this"""
         form_class = form_class or self.form_class
         return form_class(self, data, files, fields=fields, exclude=exclude, initial=self.serialize(), **kwargs)

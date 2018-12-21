@@ -13,6 +13,7 @@ from nose import tools
 from .cases import AppDataTestCase
 from .models import Article, Category
 
+
 class TestMultiForm(AppDataTestCase):
     class MyMultiForm(MultiForm):
         pass
@@ -149,6 +150,7 @@ class TestMultiForm(AppDataTestCase):
         tools.assert_equals({}, form.errors)
         art = form.save()
         tools.assert_equals({}, art.app_data)
+
 
 class TestAppDataForms(AppDataTestCase):
     class MyForm(AppDataForm):
