@@ -13,9 +13,6 @@ class TestAppDataAdmin(AppDataTestCase):
         self.url = '/admin/test_app_data/article/'
         User.objects.create_superuser('admin', 'admin@example.com', 'secret')
         self.client.login(username='admin', password='secret')
-        # self.url = '/admin/test_app_data/article/'
-        # self.user = User.objects.create_superuser('admin', 'admin@example.com', 'secret')
-        # self.client.force_login(self.user)
 
     def test_admin_can_create_article(self):
         response = self.client.post(self.url + 'add/', {
