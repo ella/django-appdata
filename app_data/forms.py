@@ -155,10 +155,6 @@ class MultiForm(with_metaclass(MultiFormMetaclass, object)):
     def is_multipart(self):
         return self.model_form.is_multipart
 
-    # def is_multipart(self):
-    #     import ipdb;ipdb.set_trace()
-    #     return self.model_form.is_multipart()
-
     @property
     def _meta(self):
         # user by BaseInlineFormSet.add_fields
