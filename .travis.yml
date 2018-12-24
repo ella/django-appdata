@@ -1,39 +1,61 @@
 language: python
-python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
+
+sudo: false
+
 matrix:
-  exclude:
-  allow_failures:
-    - python: "2.7"
-      env: DJANGO="2.0b1"
-    - python: "3.4"
-      env: DJANGO="2.0b1"
-    - python: "3.5"
-      env: DJANGO="2.0b1"
-    - python: "3.6"
-      env: DJANGO="2.0b1"
-    - python: "2.7"
-      env: DJANGO="dev"
-    - python: "3.4"
-      env: DJANGO="dev"
-    - python: "3.5"
-      env: DJANGO="dev"
-    - python: "3.6"
-      env: DJANGO="dev"
+  include:
+    # Django 1.8
+    - python: 2.7
+      env: DJANGO='dj18'
+    - python: 3.5
+      env: DJANGO='dj18'
+    # Django 1.9
+    - python: 2.7
+      env: DJANGO='dj19'
+    - python: 3.5
+      env: DJANGO='dj19'
+    # Django 1.10
+    - python: 2.7
+      env: DJANGO='dj110'
+    - python: 3.5
+      env: DJANGO='dj110'
+    # Django 1.11
+    - python: 2.7
+      env: DJANGO='dj111'
+    - python: 3.4
+      env: DJANGO='dj111'
+    - python: 3.5
+      env: DJANGO='dj111'
+    - python: 3.6
+      env: DJANGO='dj111'
+    # Django 2.0
+    - python: 3.4
+      env: DJANGO='dj20'
+    - python: 3.5
+      env: DJANGO='dj20'
+    - python: 3.6
+      env: DJANGO='dj20'
+    # Django 2.1
+    - python: 3.5
+      env: DJANGO='dj21'
+    - python: 3.6
+      env: DJANGO='dj21'
+    # Django dev
+    - python: 3.5
+      env: DJANGO='djdev'
+    - python: 3.6
+      env: DJANGO='djdev'
 
 install:
-   - "if [[ $DJANGO == 'dev' ]]; then pip install git+https://github.com/django/django.git#egg=Django; else pip install Django~=$DJANGO; fi"
-   - pip install -r requirements.txt
-   - python setup.py develop
-env:
-  - DJANGO="1.8.0"
-  - DJANGO="1.9.0"
-  - DJANGO="1.10.0"
-  - DJANGO="1.11.0"
-  - DJANGO="2.0"
-  - DJANGO="2.1"
-  - DJANGO="dev"
-script: python setup.py test
+  - pip install tox coveralls
+  - "if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then export PY_VER=py27; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then export PY_VER=py34; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then export PY_VER=py35; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == '3.6' ]]; then export PY_VER=py36; fi"
+  - "if [[ ${DJANGO}z != 'z' ]]; then export TOX_ENV=$PY_VER-$DJANGO; fi"
+
+script:
+  - tox -e $TOX_ENV
+
+after_success:
+  - coveralls
