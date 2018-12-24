@@ -13,7 +13,7 @@ class Publishable(models.Model):
 
 
 class Article(Publishable):
-    pass
+    file = models.FileField(blank=True)
 
 
 class Author(models.Model):
@@ -31,17 +31,21 @@ class PublishAppForm(AppDataForm):
     published = forms.BooleanField(required=False)
     publish_to = forms.DateTimeField(required=False)
 
+
 class RSSAppForm(AppDataForm):
     title = forms.CharField(max_length=20)
     author = forms.CharField(max_length=20)
     description = forms.CharField(max_length=200)
 
+
 class PersonalAppForm(AppDataForm):
     first_name = forms.CharField(max_length=20, required=False)
     last_name = forms.CharField(max_length=20, required=False)
 
+
 class AlternateRegistryAppForm(AppDataForm):
     alternate_field = forms.CharField(max_length=20, required=False)
+
 
 app_registry.register('publish', AppDataContainer.from_form(PublishAppForm))
 app_registry.register('rss', AppDataContainer.from_form(RSSAppForm))

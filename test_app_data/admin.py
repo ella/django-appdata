@@ -13,6 +13,7 @@ class AuthorInline(AppDataTabularInline):
 
 
 class ArticleModelAdmin(AppDataModelAdmin):
+    fields = ['file']
     declared_fieldsets = [
         (None, {'fields': ['rss.title']}),
         ('Meta', {'fields': ['rss.author']}),
