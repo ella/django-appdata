@@ -7,9 +7,10 @@ from .cases import AppDataTestCase
 
 
 class TestAppDataAdmin(AppDataTestCase):
+
     def setUp(self):
         super(TestAppDataAdmin, self).setUp()
-        self.url =  '/admin/test_app_data/article/'
+        self.url = '/admin/test_app_data/article/'
         User.objects.create_superuser('admin', 'admin@example.com', 'secret')
         self.client.login(username='admin', password='secret')
 

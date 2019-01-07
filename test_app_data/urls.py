@@ -1,5 +1,5 @@
 
-from django.conf.urls import include, url
+from django.conf.urls import url
 
 
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -7,7 +7,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from .admin import site
 
 urlpatterns = [
-    url(r'^admin/', include(site.urls))
+    url(r'^admin/', site.urls)
 ]
 
 urlpatterns = urlpatterns + staticfiles_urlpatterns()

@@ -34,8 +34,9 @@ class AppDataForm(Form):
     def save(self):
         self.app_container.update(self.cleaned_data)
 
+
 class BaseFieldsDescriptor(object):
-    " Combines the base_fields and prefixes them properly. Descriptor because needed on class level. "
+    """Combines the base_fields and prefixes them properly. Descriptor because needed on class level."""
     def __get__(self, instance, owner):
 
         if not hasattr(self, '_base_fields'):
@@ -63,12 +64,14 @@ class BaseFieldsDescriptor(object):
 
         return self._base_fields
 
+
 class AppFormOptsDescriptor(object):
     def __get__(self, instance, owner):
         # we cannot check hasattr because parent's app_form_opts would pick it up
         if not '_app_form_opts' in owner.__dict__:
             setattr(owner, '_app_form_opts', {})
         return owner._app_form_opts
+
 
 class MultiFormMetaclass(type):
     # This property is needed by BaseInlineFormSet which expect the form *class* to have a "real" _meta
@@ -102,7 +105,7 @@ class MultiForm(with_metaclass(MultiFormMetaclass, object)):
 
     @classmethod
     def get_app_form_opts(cls):
-        " Utility method to combine app_form_opts from all base classes. "
+        """Utility method to combine app_form_opts from all base classes."""
         # subclass may wish to remove superclass's app_form
         skip_labels = set()
 
@@ -128,7 +131,7 @@ class MultiForm(with_metaclass(MultiFormMetaclass, object)):
 
     @classmethod
     def add_form(cls, label, form_options={}):
-        " Add an app_data form to the multi form after its creation. "
+        """Add an app_data form to the multi form after its creation."""
         cls.app_form_opts[label] = form_options.copy()
 
     @classmethod
@@ -147,6 +150,10 @@ class MultiForm(with_metaclass(MultiFormMetaclass, object)):
     @property
     def cleaned_data(self):
         return self.model_form.cleaned_data
+
+    @property
+    def is_multipart(self):
+        return self.model_form.is_multipart
 
     @property
     def _meta(self):
@@ -257,6 +264,7 @@ class MultiForm(with_metaclass(MultiFormMetaclass, object)):
         # save the model itself
         return self.model_form.save(**kwargs)
 
+
 class AppDataBaseInlineFormSet(BaseInlineFormSet):
 
     def add_fields(self, form, index):
@@ -277,6 +285,7 @@ def multiform_factory(model, multiform=MultiForm, app_data_field='app_data', nam
         {'ModelForm': model_form, 'app_data_field': app_data_field, '_app_form_opts': form_opts}
     )
 
+
 def multiformset_factory(model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={},
                          formset=BaseModelFormSet, extra=3, can_order=False, can_delete=True, max_num=None,
                          **kwargs):
@@ -284,6 +293,7 @@ def multiformset_factory(model, multiform=MultiForm, app_data_field='app_data', 
     FormSet = formset_factory(multiform, formset=formset, extra=extra, can_order=can_order, can_delete=can_delete, max_num=max_num)
     FormSet.model = model
     return FormSet
+
 
 def multiinlineformset_factory(parent_model, model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={},
                                 formset=BaseInlineFormSet, fk_name=None, **kwargs):

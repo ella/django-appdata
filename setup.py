@@ -11,7 +11,7 @@ long_description = f.read().strip()
 f.close()
 
 install_requires = [
-    'Django>=1.8,<2.0',
+    'Django>=1.8,<2.2',
 ]
 test_requires = [
     'nose',

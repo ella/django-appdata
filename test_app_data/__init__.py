@@ -1,4 +1,3 @@
-from distutils.version import LooseVersion
 from os import environ
 import django
 
@@ -19,6 +18,7 @@ def setup():
 
     test_runner.setup_test_environment()
     old_config = test_runner.setup_databases()
+
 
 def teardown():
     test_runner.teardown_databases(old_config)

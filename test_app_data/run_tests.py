@@ -26,6 +26,6 @@ def run_all(argv=None):
         defaultTest=path.abspath(path.dirname(__file__))
     )
 
+
 if __name__ == '__main__':
     run_all(sys.argv)
-
