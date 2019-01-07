@@ -49,7 +49,7 @@ class AppDataField(TextField):
         super(AppDataField, self).__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name, **kwargs):
-        super(AppDataField, self).contribute_to_class(cls, name)
+        super(AppDataField, self).contribute_to_class(cls, name, **kwargs)
         setattr(cls, name, AppDataDescriptor(self))
 
     def get_db_prep_value(self, value, connection, prepared=False):

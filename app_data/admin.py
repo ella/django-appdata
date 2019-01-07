@@ -87,7 +87,7 @@ class AppDataModelAdmin(AppDataAdminMixin, ModelAdmin):
         add_view and change_view.
         """
         if self.multiform is None:
-            return super(AppDataModelAdmin, self).get_form(request, obj=obj, change=change, **kwargs)
+            return super(AppDataModelAdmin, self).get_form(request, obj=obj, **kwargs)
         return multiform_factory(self.model, **self._get_form_factory_opts(request, obj, **kwargs))
 
 
