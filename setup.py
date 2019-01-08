@@ -2,7 +2,7 @@ from os.path import join, dirname
 
 from setuptools import setup
 
-VERSION = (0, 2, 0)
+VERSION = (0, 2, 1)
 __version__ = VERSION
 __versionstr__ = '.'.join(map(str, VERSION))
 
@@ -32,6 +32,13 @@ setup(
     include_package_data=True,
     classifiers=[
         'Development Status :: 4 - Beta',
+        'Framework :: Django',
+        'Framework :: Django :: 1.8',
+        'Framework :: Django :: 1.9',
+        'Framework :: Django :: 1.10',
+        'Framework :: Django :: 1.11',
+        'Framework :: Django :: 2.0',
+        'Framework :: Django :: 2.1',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
