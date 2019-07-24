@@ -2,7 +2,7 @@ from os.path import join, dirname
 
 from setuptools import setup
 
-VERSION = (0, 2, 1)
+VERSION = (0, 2, 2)
 __version__ = VERSION
 __versionstr__ = '.'.join(map(str, VERSION))
 
@@ -11,7 +11,7 @@ long_description = f.read().strip()
 f.close()
 
 install_requires = [
-    'Django>=1.8,<2.2',
+    'Django>=1.8,<3.0',
 ]
 test_requires = [
     'nose',
@@ -39,6 +39,7 @@ setup(
         'Framework :: Django :: 1.11',
         'Framework :: Django :: 2.0',
         'Framework :: Django :: 2.1',
+        'Framework :: Django :: 2.2',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
@@ -46,6 +47,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Operating System :: OS Independent',
     ],
     install_requires=install_requires,

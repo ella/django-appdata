@@ -1,3 +1,4 @@
+dist: xenial
 language: python
 
 sudo: false
@@ -40,11 +41,15 @@ matrix:
       env: DJANGO='dj21'
     - python: 3.6
       env: DJANGO='dj21'
-    # Django dev
+    - python: 3.7
+      env: DJANGO='dj21'
+    # Django 2.2
     - python: 3.5
-      env: DJANGO='djdev'
+      env: DJANGO='dj22'
     - python: 3.6
-      env: DJANGO='djdev'
+      env: DJANGO='dj22'
+    - python: 3.7
+      env: DJANGO='dj22'
 
 install:
   - pip install tox coveralls
@@ -52,6 +57,7 @@ install:
   - "if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then export PY_VER=py34; fi"
   - "if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then export PY_VER=py35; fi"
   - "if [[ $TRAVIS_PYTHON_VERSION == '3.6' ]]; then export PY_VER=py36; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == '3.7' ]]; then export PY_VER=py37; fi"
   - "if [[ ${DJANGO}z != 'z' ]]; then export TOX_ENV=$PY_VER-$DJANGO; fi"
 
 script:

@@ -19,8 +19,8 @@ to provide a standardised approach to extending existing apps.
 Supported versions
 ******************
 
-Python: 2.7, 3.4, 3.5, 3.6
-Django: 1.8, 1.9, 1.10, 1.11, 2.0, 2.1
+Python: 2.7, 3.4, 3.5, 3.6, 3.7
+Django: 1.8, 1.9, 1.10, 1.11, 2.0, 2.2
 
 Upgrading to 0.2
 ****************
@@ -59,7 +59,7 @@ it's own data there by registering a *container* (subclass of
 
     class TaggingAppDataContainer(AppDataContainer):
         form_class = TaggingAppDataForm
-        
+
         def tag_string(self):
             print ', '.join(t.name for t in self.public_tags)
 
