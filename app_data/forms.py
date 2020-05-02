@@ -1,18 +1,13 @@
 from operator import methodcaller
 from copy import deepcopy
 
+import six
+
 from django.forms.forms import NON_FIELD_ERRORS, Form
 from django.forms.formsets import formset_factory
 from django.forms.models import modelform_factory, _get_foreign_key, BaseInlineFormSet, BaseModelFormSet
+from django.forms.utils import pretty_name
 from django.utils.safestring import mark_safe
-from django.utils import six
-from django.utils.six import with_metaclass
-
-
-try:
-    from django.forms.utils import pretty_name
-except ImportError:
-    from django.forms.forms import pretty_name  # COMPAT: Django==1.8
 
 
 class AppDataForm(Form):
@@ -81,7 +76,7 @@ class MultiFormMetaclass(type):
         return cls.ModelForm._meta
 
 
-class MultiForm(with_metaclass(MultiFormMetaclass, object)):
+class MultiForm(six.with_metaclass(MultiFormMetaclass, object)):
     app_data_field = 'app_data'
     app_form_opts = AppFormOptsDescriptor()
 

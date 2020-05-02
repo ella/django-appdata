@@ -2,7 +2,7 @@ from os.path import join, dirname
 
 from setuptools import setup
 
-VERSION = (0, 2, 2)
+VERSION = (0, 3, 0)
 __version__ = VERSION
 __versionstr__ = '.'.join(map(str, VERSION))
 
@@ -11,7 +11,8 @@ long_description = f.read().strip()
 f.close()
 
 install_requires = [
-    'Django>=1.8,<3.0',
+    'Django>=1.11,<3.1',
+    'six'
 ]
 test_requires = [
     'nose',

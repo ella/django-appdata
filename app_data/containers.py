@@ -1,7 +1,8 @@
 from copy import copy
 
+import six
+
 from django.core.exceptions import ValidationError
-from django.utils import six
 
 from .registry import app_registry
 from .forms import AppDataForm
