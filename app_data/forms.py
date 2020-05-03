@@ -11,9 +11,9 @@ from django.utils.safestring import mark_safe
 
 
 class AppDataForm(Form):
-    def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
+    def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), *args, **kwargs):
         self.app_container = app_container
-        super(AppDataForm, self).__init__(data, files, **kwargs)
+        super(AppDataForm, self).__init__(data, files, *args, **kwargs)
 
         if fields or exclude:
             for f in list(self.fields.keys()):
@@ -83,6 +83,10 @@ class MultiForm(six.with_metaclass(MultiFormMetaclass, object)):
     def __init__(self, *args, **kwargs):
         # construct the main model form
         self.model_form = self.ModelForm(*args, **kwargs)
+        try:
+            self.label_suffix = self.model_form.label_suffix
+        except AttributeError:
+            pass
         if self.model_form.is_bound:
             data = self.model_form.data
             files = self.model_form.files
