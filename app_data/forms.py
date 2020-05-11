@@ -1,24 +1,19 @@
 from operator import methodcaller
 from copy import deepcopy
 
+import six
+
 from django.forms.forms import NON_FIELD_ERRORS, Form
 from django.forms.formsets import formset_factory
 from django.forms.models import modelform_factory, _get_foreign_key, BaseInlineFormSet, BaseModelFormSet
+from django.forms.utils import pretty_name
 from django.utils.safestring import mark_safe
-from django.utils import six
-from django.utils.six import with_metaclass
-
-
-try:
-    from django.forms.utils import pretty_name
-except ImportError:
-    from django.forms.forms import pretty_name  # COMPAT: Django==1.8
 
 
 class AppDataForm(Form):
-    def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), **kwargs):
+    def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), *args, **kwargs):
         self.app_container = app_container
-        super(AppDataForm, self).__init__(data, files, **kwargs)
+        super(AppDataForm, self).__init__(data, files, *args, **kwargs)
 
         if fields or exclude:
             for f in list(self.fields.keys()):
@@ -81,13 +76,17 @@ class MultiFormMetaclass(type):
         return cls.ModelForm._meta
 
 
-class MultiForm(with_metaclass(MultiFormMetaclass, object)):
+class MultiForm(six.with_metaclass(MultiFormMetaclass, object)):
     app_data_field = 'app_data'
     app_form_opts = AppFormOptsDescriptor()
 
     def __init__(self, *args, **kwargs):
         # construct the main model form
         self.model_form = self.ModelForm(*args, **kwargs)
+        try:
+            self.label_suffix = self.model_form.label_suffix
+        except AttributeError:
+            pass
         if self.model_form.is_bound:
             data = self.model_form.data
             files = self.model_form.files
