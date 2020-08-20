@@ -20,7 +20,7 @@ Supported versions
 ******************
 
 Python: 2.7, 3.5, 3.6, 3.7, 3.8
-Django: 1.11, 2.2, 3.0
+Django: 1.11, 2.2, 3.0, 3.1
 
 Upgrading to 0.3
 ****************
