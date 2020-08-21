@@ -1,4 +1,5 @@
 include README.rst requirements.txt dev_requirements.txt
+include LICENSE
 include setup.py MANIFEST.in
 
 recursive-include app_data *
