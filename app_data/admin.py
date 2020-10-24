@@ -61,7 +61,7 @@ class AppDataAdminMixin(object):
 
         # Django 3.1 always adds the fields attribute to the kwargs
         # and we must remove appdata fields from this list
-        kwargs["fields"] = [f for f in fields if '.' not in kwargs["fields"]]
+        kwargs["fields"] = [f for f in fields if '.' not in kwargs.get("fields", [])]
 
         # if exclude is an empty list we pass None to be consistant with the
         # default on modelform_factory
