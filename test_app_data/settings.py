@@ -10,7 +10,9 @@ TEMPLATE_LOADERS = (
 
 TEMPLATE_OPTIONS = {
     'context_processors': [
-        'django.contrib.auth.context_processors.auth'
+        'django.contrib.auth.context_processors.auth',
+        'django.template.context_processors.request',
+        'django.contrib.messages.context_processors.messages',
     ],
     'loaders': TEMPLATE_LOADERS,
 }
@@ -50,6 +52,6 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.admin',
-
+    'django.contrib.messages',
     'test_app_data',
 )
