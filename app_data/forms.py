@@ -1,19 +1,33 @@
-from operator import methodcaller
 from copy import deepcopy
-
-import six
+from operator import methodcaller
 
 from django.forms.forms import NON_FIELD_ERRORS, Form
 from django.forms.formsets import formset_factory
-from django.forms.models import modelform_factory, _get_foreign_key, BaseInlineFormSet, BaseModelFormSet
+from django.forms.models import (
+    BaseInlineFormSet,
+    BaseModelFormSet,
+    _get_foreign_key,
+    modelform_factory,
+)
 from django.forms.utils import pretty_name
 from django.utils.safestring import mark_safe
 
+import six
+
 
 class AppDataForm(Form):
-    def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), *args, **kwargs):
+    def __init__(
+        self,
+        app_container,
+        data=None,
+        files=None,
+        fields=(),
+        exclude=(),
+        *args,
+        **kwargs
+    ):
         self.app_container = app_container
-        super(AppDataForm, self).__init__(data, files, *args, **kwargs)
+        super().__init__(data, files, *args, **kwargs)
 
         if fields or exclude:
             for f in list(self.fields.keys()):
@@ -30,11 +44,11 @@ class AppDataForm(Form):
         self.app_container.update(self.cleaned_data)
 
 
-class BaseFieldsDescriptor(object):
+class BaseFieldsDescriptor:
     """Combines the base_fields and prefixes them properly. Descriptor because needed on class level."""
-    def __get__(self, instance, owner):
 
-        if not hasattr(self, '_base_fields'):
+    def __get__(self, instance, owner):
+        if not hasattr(self, "_base_fields"):
             self._base_fields = bf = {}
 
             # construct an empty model to get to the data container and thus to the form classes
@@ -44,27 +58,27 @@ class BaseFieldsDescriptor(object):
             bf.update(owner.ModelForm.base_fields)
 
             # go through all the app forms...
-            for label, opts in six.iteritems(owner.get_app_form_opts()):
+            for label, opts in owner.get_app_form_opts().items():
                 Form = app_container[label].form_class
-                exclude = set(opts.get('exclude', ()))
-                fields = opts.get('fields', None)
-                for name, field in six.iteritems(Form.base_fields):
+                exclude = set(opts.get("exclude", ()))
+                fields = opts.get("fields", None)
+                for name, field in Form.base_fields.items():
                     # skip proper fields
                     if fields is not None and name not in fields:
                         continue
                     if name in exclude:
                         continue
                     # prefix the fields
-                    bf['%s.%s' % (label, name)] = field
+                    bf["{}.{}".format(label, name)] = field
 
         return self._base_fields
 
 
-class AppFormOptsDescriptor(object):
+class AppFormOptsDescriptor:
     def __get__(self, instance, owner):
         # we cannot check hasattr because parent's app_form_opts would pick it up
-        if not '_app_form_opts' in owner.__dict__:
-            setattr(owner, '_app_form_opts', {})
+        if not "_app_form_opts" in owner.__dict__:
+            setattr(owner, "_app_form_opts", {})
         return owner._app_form_opts
 
 
@@ -76,8 +90,8 @@ class MultiFormMetaclass(type):
         return cls.ModelForm._meta
 
 
-class MultiForm(six.with_metaclass(MultiFormMetaclass, object)):
-    app_data_field = 'app_data'
+class MultiForm(metaclass=MultiFormMetaclass):
+    app_data_field = "app_data"
     app_form_opts = AppFormOptsDescriptor()
 
     def __init__(self, *args, **kwargs):
@@ -96,11 +110,13 @@ class MultiForm(six.with_metaclass(MultiFormMetaclass, object)):
         # construct all the app forms
         self.app_forms = {}
         app_container = getattr(self.model_form.instance, self.app_data_field)
-        for label, label_opts in six.iteritems(self.get_app_form_opts()):
+        for label, label_opts in self.get_app_form_opts().items():
             prefix = label
             if self.model_form.prefix:
-                prefix = '%s-%s' % (self.model_form.prefix, prefix)
-            self.app_forms[label] = app_container[label].get_form(data, files, prefix=prefix, **label_opts)
+                prefix = "{}-{}".format(self.model_form.prefix, prefix)
+            self.app_forms[label] = app_container[label].get_form(
+                data, files, prefix=prefix, **label_opts
+            )
 
     @classmethod
     def get_app_form_opts(cls):
@@ -112,9 +128,9 @@ class MultiForm(six.with_metaclass(MultiFormMetaclass, object)):
         # go through class hierarchy and collect form definitions
         for c in cls.mro():
             # not a MultiForm, skip
-            if not hasattr(c, 'app_form_opts'):
+            if not hasattr(c, "app_form_opts"):
                 continue
-            for label, label_opts in six.iteritems(c.app_form_opts):
+            for label, label_opts in c.app_form_opts.items():
                 if label in form_opts or label in skip_labels:
                     # form already defined, or should be skipped
                     continue
@@ -190,32 +206,33 @@ class MultiForm(six.with_metaclass(MultiFormMetaclass, object)):
 
     def _get_all_forms(self):
         yield self.model_form
-        for f in six.itervalues(self.app_forms):
-            yield f
+        yield from self.app_forms.values()
 
     def __unicode__(self):
         return self.as_table()
 
     def as_ul(self):
-        return mark_safe(u'\n'.join(map(methodcaller('as_ul'), self._get_all_forms())))
+        return mark_safe("\n".join(map(methodcaller("as_ul"), self._get_all_forms())))
 
     def as_table(self):
-        return mark_safe(u'\n'.join(map(methodcaller('as_table'), self._get_all_forms())))
+        return mark_safe(
+            "\n".join(map(methodcaller("as_table"), self._get_all_forms()))
+        )
 
     def as_p(self):
-        return mark_safe(u'\n'.join(map(methodcaller('as_p'), self._get_all_forms())))
+        return mark_safe("\n".join(map(methodcaller("as_p"), self._get_all_forms())))
 
     def is_valid(self):
-        return all(map(methodcaller('is_valid'), self._get_all_forms()))
+        return all(map(methodcaller("is_valid"), self._get_all_forms()))
 
     def has_changed(self):
-        return any(map(methodcaller('has_changed'), self._get_all_forms()))
+        return any(map(methodcaller("has_changed"), self._get_all_forms()))
 
     def __getitem__(self, name):
         # provide access to app.field as well
         app = None
-        if '.' in name:
-            app, name = name.split('.', 1)
+        if "." in name:
+            app, name = name.split(".", 1)
 
         if app is None:
             form = self.model_form
@@ -223,34 +240,36 @@ class MultiForm(six.with_metaclass(MultiFormMetaclass, object)):
             try:
                 form = self.app_forms[app]
             except KeyError:
-                raise KeyError('AppForm %r not found in MultiForm.' % name)
+                raise KeyError("AppForm %r not found in MultiForm." % name)
 
         try:
             field = form[name]
         except KeyError:
-            raise KeyError('Field %r not found in Form %s' % (name, form.fields))
+            raise KeyError("Field {!r} not found in Form {}".format(name, form.fields))
 
         return field
 
     @property
     def changed_data(self):
-        if not hasattr(self, '_changed_data'):
+        if not hasattr(self, "_changed_data"):
             self._changed_data = cd = self.model_form.changed_data[:]
-            for label, form in six.iteritems(self.app_forms):
-                cd.extend(map(lambda n: '%s.%s' % (label, n), form.changed_data))
+            for label, form in self.app_forms.items():
+                cd.extend(map(lambda n: "{}.{}".format(label, n), form.changed_data))
         return self._changed_data
 
     @property
     def errors(self):
         # combine all the errors
-        if not hasattr(self, '_errors'):
+        if not hasattr(self, "_errors"):
             self._errors = self.model_form.errors.copy()
-            for label, form in six.iteritems(self.app_forms):
-                for k, v in six.iteritems(form.errors):
+            for label, form in self.app_forms.items():
+                for k, v in form.errors.items():
                     if k == NON_FIELD_ERRORS:
-                        self._errors.setdefault(k, self.model_form.error_class()).extend(v)
+                        self._errors.setdefault(
+                            k, self.model_form.error_class()
+                        ).extend(v)
                     else:
-                        self._errors['%s.%s' % (label, k)] = v
+                        self._errors["{}.{}".format(label, k)] = v
         return self._errors
 
     def non_field_errors(self):
@@ -265,40 +284,81 @@ class MultiForm(six.with_metaclass(MultiFormMetaclass, object)):
 
 
 class AppDataBaseInlineFormSet(BaseInlineFormSet):
-
     def add_fields(self, form, index):
         """appcontainer fields are no longer added to the empty form, we can inject them hooking here."""
-        super(AppDataBaseInlineFormSet, self).add_fields(form, index)
+        super().add_fields(form, index)
         for name, field in form.base_fields.items():
             if name not in form.fields:
                 form.fields[name] = deepcopy(field)
                 if not form.fields[name].label:
-                    form.fields[name].label = pretty_name(name.split('.')[1])
+                    form.fields[name].label = pretty_name(name.split(".")[1])
 
 
-def multiform_factory(model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={}, **kwargs):
+def multiform_factory(
+    model,
+    multiform=MultiForm,
+    app_data_field="app_data",
+    name=None,
+    form_opts={},
+    **kwargs
+):
     model_form = modelform_factory(model, **kwargs)
-    name = name or '%sWithAppDataForm' % model_form._meta.model.__name__
+    name = name or "%sWithAppDataForm" % model_form._meta.model.__name__
     return type(
-        name, (multiform, ),
-        {'ModelForm': model_form, 'app_data_field': app_data_field, '_app_form_opts': form_opts}
+        name,
+        (multiform,),
+        {
+            "ModelForm": model_form,
+            "app_data_field": app_data_field,
+            "_app_form_opts": form_opts,
+        },
     )
 
 
-def multiformset_factory(model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={},
-                         formset=BaseModelFormSet, extra=3, can_order=False, can_delete=True, max_num=None,
-                         **kwargs):
-    multiform = multiform_factory(model, multiform, app_data_field, name, form_opts, **kwargs)
-    FormSet = formset_factory(multiform, formset=formset, extra=extra, can_order=can_order, can_delete=can_delete, max_num=max_num)
+def multiformset_factory(
+    model,
+    multiform=MultiForm,
+    app_data_field="app_data",
+    name=None,
+    form_opts={},
+    formset=BaseModelFormSet,
+    extra=3,
+    can_order=False,
+    can_delete=True,
+    max_num=None,
+    **kwargs
+):
+    multiform = multiform_factory(
+        model, multiform, app_data_field, name, form_opts, **kwargs
+    )
+    FormSet = formset_factory(
+        multiform,
+        formset=formset,
+        extra=extra,
+        can_order=can_order,
+        can_delete=can_delete,
+        max_num=max_num,
+    )
     FormSet.model = model
     return FormSet
 
 
-def multiinlineformset_factory(parent_model, model, multiform=MultiForm, app_data_field='app_data', name=None, form_opts={},
-                                formset=BaseInlineFormSet, fk_name=None, **kwargs):
+def multiinlineformset_factory(
+    parent_model,
+    model,
+    multiform=MultiForm,
+    app_data_field="app_data",
+    name=None,
+    form_opts={},
+    formset=BaseInlineFormSet,
+    fk_name=None,
+    **kwargs
+):
     fk = _get_foreign_key(parent_model, model, fk_name=fk_name)
     if fk.unique:
-        kwargs['max_num'] = 1
-    FormSet = multiformset_factory(model, multiform, app_data_field, name, form_opts, formset=formset, **kwargs)
+        kwargs["max_num"] = 1
+    FormSet = multiformset_factory(
+        model, multiform, app_data_field, name, form_opts, formset=formset, **kwargs
+    )
     FormSet.fk = fk
     return FormSet

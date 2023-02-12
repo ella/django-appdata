@@ -1,4 +1,4 @@
-from .fields import AppDataField, ListModelMultipleChoiceField
-from .registry import app_registry, NamespaceRegistry
 from .containers import AppDataContainer
-from .forms import AppDataForm, multiform_factory, MultiForm
+from .fields import AppDataField, ListModelMultipleChoiceField
+from .forms import AppDataForm, MultiForm, multiform_factory
+from .registry import NamespaceRegistry, app_registry

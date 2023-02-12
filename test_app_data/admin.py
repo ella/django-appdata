@@ -8,16 +8,16 @@ from .models import Article, Author
 class AuthorInline(AppDataTabularInline):
     model = Author
     declared_fieldsets = [
-        ('Personal', {'fields': [('personal.first_name', 'personal.last_name')]})
+        ("Personal", {"fields": [("personal.first_name", "personal.last_name")]})
     ]
 
 
 class ArticleModelAdmin(AppDataModelAdmin):
-    fields = ['file']
+    fields = ["file"]
     declared_fieldsets = [
-        (None, {'fields': ['rss.title', 'file']}),
-        ('Meta', {'fields': ['rss.author']}),
-        ('Publish', {'fields': [('publish.publish_from', 'publish.published')]}),
+        (None, {"fields": ["rss.title", "file"]}),
+        ("Meta", {"fields": ["rss.author"]}),
+        ("Publish", {"fields": [("publish.publish_from", "publish.published")]}),
     ]
     inlines = [AuthorInline]
 
