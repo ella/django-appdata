@@ -2,8 +2,6 @@ from copy import copy
 
 from django.core.exceptions import ValidationError
 
-import six
-
 from .forms import AppDataForm
 from .registry import app_registry
 
@@ -19,23 +17,14 @@ class AppDataContainerFactory(dict):
         return "<AppDataContainerFactory: %s>" % super().__repr__()
 
     def __setattr__(self, name, value):
-        if (
-            name.startswith("_")
-            or self._app_registry.get_class(name, self._model) is None
-        ):
+        if name.startswith("_") or self._app_registry.get_class(name, self._model) is None:
             super().__setattr__(name, value)
         else:
             self[name] = copy(value)
 
     def __getattr__(self, name):
-        if (
-            name.startswith("_")
-            or self._app_registry.get_class(name, self._model) is None
-        ):
-            raise AttributeError(
-                "No Container registered under %s for class %s"
-                % (name, self._model.__name__)
-            )
+        if name.startswith("_") or self._app_registry.get_class(name, self._model) is None:
+            raise AttributeError("No Container registered under {} for class {}".format(name, self._model.__name__))
         return self[name]
 
     def __getitem__(self, name):
@@ -221,17 +210,7 @@ class AppDataContainer:
             self._data[name] = value
         return self._data
 
-    def get_form(
-        self, data=None, files=None, fields=(), exclude=(), form_class=None, **kwargs
-    ):
+    def get_form(self, data=None, files=None, fields=(), exclude=(), form_class=None, **kwargs):
         """Construct a form for this"""
         form_class = form_class or self.form_class
-        return form_class(
-            self,
-            data,
-            files,
-            fields=fields,
-            exclude=exclude,
-            initial=self.serialize(),
-            **kwargs
-        )
+        return form_class(self, data, files, fields=fields, exclude=exclude, initial=self.serialize(), **kwargs)

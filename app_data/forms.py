@@ -12,20 +12,9 @@ from django.forms.models import (
 from django.forms.utils import pretty_name
 from django.utils.safestring import mark_safe
 
-import six
-
 
 class AppDataForm(Form):
-    def __init__(
-        self,
-        app_container,
-        data=None,
-        files=None,
-        fields=(),
-        exclude=(),
-        *args,
-        **kwargs
-    ):
+    def __init__(self, app_container, data=None, files=None, fields=(), exclude=(), *args, **kwargs):
         self.app_container = app_container
         super().__init__(data, files, *args, **kwargs)
 
@@ -59,7 +48,7 @@ class BaseFieldsDescriptor:
 
             # go through all the app forms...
             for label, opts in owner.get_app_form_opts().items():
-                Form = app_container[label].form_class
+                Form = app_container[label].form_class  # noqa: N806
                 exclude = set(opts.get("exclude", ()))
                 fields = opts.get("fields", None)
                 for name, field in Form.base_fields.items():
@@ -77,8 +66,8 @@ class BaseFieldsDescriptor:
 class AppFormOptsDescriptor:
     def __get__(self, instance, owner):
         # we cannot check hasattr because parent's app_form_opts would pick it up
-        if not "_app_form_opts" in owner.__dict__:
-            setattr(owner, "_app_form_opts", {})
+        if "_app_form_opts" not in owner.__dict__:
+            owner._app_form_opts = {}
         return owner._app_form_opts
 
 
@@ -114,9 +103,7 @@ class MultiForm(metaclass=MultiFormMetaclass):
             prefix = label
             if self.model_form.prefix:
                 prefix = "{}-{}".format(self.model_form.prefix, prefix)
-            self.app_forms[label] = app_container[label].get_form(
-                data, files, prefix=prefix, **label_opts
-            )
+            self.app_forms[label] = app_container[label].get_form(data, files, prefix=prefix, **label_opts)
 
     @classmethod
     def get_app_form_opts(cls):
@@ -145,8 +132,9 @@ class MultiForm(metaclass=MultiFormMetaclass):
         return form_opts
 
     @classmethod
-    def add_form(cls, label, form_options={}):
+    def add_form(cls, label, form_options=None):
         """Add an app_data form to the multi form after its creation."""
+        form_options = form_options or {}
         cls.app_form_opts[label] = form_options.copy()
 
     @classmethod
@@ -215,9 +203,7 @@ class MultiForm(metaclass=MultiFormMetaclass):
         return mark_safe("\n".join(map(methodcaller("as_ul"), self._get_all_forms())))
 
     def as_table(self):
-        return mark_safe(
-            "\n".join(map(methodcaller("as_table"), self._get_all_forms()))
-        )
+        return mark_safe("\n".join(map(methodcaller("as_table"), self._get_all_forms())))
 
     def as_p(self):
         return mark_safe("\n".join(map(methodcaller("as_p"), self._get_all_forms())))
@@ -254,7 +240,7 @@ class MultiForm(metaclass=MultiFormMetaclass):
         if not hasattr(self, "_changed_data"):
             self._changed_data = cd = self.model_form.changed_data[:]
             for label, form in self.app_forms.items():
-                cd.extend(map(lambda n: "{}.{}".format(label, n), form.changed_data))
+                cd.extend((lambda n: "{}.{}".format(label, n), form.changed_data))  # noqa: B023
         return self._changed_data
 
     @property
@@ -265,9 +251,7 @@ class MultiForm(metaclass=MultiFormMetaclass):
             for label, form in self.app_forms.items():
                 for k, v in form.errors.items():
                     if k == NON_FIELD_ERRORS:
-                        self._errors.setdefault(
-                            k, self.model_form.error_class()
-                        ).extend(v)
+                        self._errors.setdefault(k, self.model_form.error_class()).extend(v)
                     else:
                         self._errors["{}.{}".format(label, k)] = v
         return self._errors
@@ -294,14 +278,8 @@ class AppDataBaseInlineFormSet(BaseInlineFormSet):
                     form.fields[name].label = pretty_name(name.split(".")[1])
 
 
-def multiform_factory(
-    model,
-    multiform=MultiForm,
-    app_data_field="app_data",
-    name=None,
-    form_opts={},
-    **kwargs
-):
+def multiform_factory(model, multiform=MultiForm, app_data_field="app_data", name=None, form_opts=None, **kwargs):
+    form_opts = form_opts or {}
     model_form = modelform_factory(model, **kwargs)
     name = name or "%sWithAppDataForm" % model_form._meta.model.__name__
     return type(
@@ -320,18 +298,17 @@ def multiformset_factory(
     multiform=MultiForm,
     app_data_field="app_data",
     name=None,
-    form_opts={},
+    form_opts=None,
     formset=BaseModelFormSet,
     extra=3,
     can_order=False,
     can_delete=True,
     max_num=None,
-    **kwargs
+    **kwargs,
 ):
-    multiform = multiform_factory(
-        model, multiform, app_data_field, name, form_opts, **kwargs
-    )
-    FormSet = formset_factory(
+    form_opts = form_opts or {}
+    multiform = multiform_factory(model, multiform, app_data_field, name, form_opts, **kwargs)
+    FormSet = formset_factory(  # noqa: N806
         multiform,
         formset=formset,
         extra=extra,
@@ -349,16 +326,23 @@ def multiinlineformset_factory(
     multiform=MultiForm,
     app_data_field="app_data",
     name=None,
-    form_opts={},
+    form_opts=None,
     formset=BaseInlineFormSet,
     fk_name=None,
-    **kwargs
+    **kwargs,
 ):
+    form_opts = form_opts or {}
     fk = _get_foreign_key(parent_model, model, fk_name=fk_name)
     if fk.unique:
         kwargs["max_num"] = 1
-    FormSet = multiformset_factory(
-        model, multiform, app_data_field, name, form_opts, formset=formset, **kwargs
-    )
+    FormSet = multiformset_factory(  # noqa: N806
+        model,
+        multiform,
+        app_data_field,
+        name,
+        form_opts,
+        formset=formset,
+        **kwargs,
+    )  # noqa: N806
     FormSet.fk = fk
     return FormSet

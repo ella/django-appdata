@@ -4,8 +4,6 @@ from django import forms
 from django.db.models import TextField
 from django.utils.encoding import smart_str
 
-import six
-
 from .containers import AppDataContainerFactory
 from .registry import app_registry
 
@@ -26,9 +24,7 @@ class AppDataDescriptor:
             value = json.loads(value)
 
         if isinstance(value, dict) and not isinstance(value, AppDataContainerFactory):
-            value = AppDataContainerFactory(
-                instance, value, app_registry=self.field.app_registry
-            )
+            value = AppDataContainerFactory(instance, value, app_registry=self.field.app_registry)
             instance.__dict__[self.field.name] = value
 
         value._instance = instance
@@ -40,9 +36,7 @@ class AppDataDescriptor:
         if instance is None:
             raise AttributeError("%s must be accessed via instance" % self.field.name)
         if isinstance(value, dict) and not isinstance(value, AppDataContainerFactory):
-            value = AppDataContainerFactory(
-                instance, value, app_registry=self.field.app_registry
-            )
+            value = AppDataContainerFactory(instance, value, app_registry=self.field.app_registry)
         instance.__dict__[self.field.name] = value
 
 

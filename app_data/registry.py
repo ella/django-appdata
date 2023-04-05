@@ -1,4 +1,4 @@
-class NamespaceConflict(Exception):
+class NamespaceConflict(Exception):  # noqa: N818
     pass
 
 
@@ -38,28 +38,16 @@ class NamespaceRegistry:
         return self.default_class
 
     def register(self, namespace, class_, model=None, override=False):
-        registry = (
-            self._model_registry.setdefault(model, {})
-            if model is not None
-            else self._global_registry
-        )
+        registry = self._model_registry.setdefault(model, {}) if model is not None else self._global_registry
         if namespace in registry and not override:
             raise NamespaceConflict(
                 "Namespace %r already assigned to class %r%s."
-                % (
-                    namespace,
-                    registry[namespace],
-                    "" if model is None else " for model %s" % model._meta,
-                )
+                % (namespace, registry[namespace], "" if model is None else " for model %s" % model._meta),
             )
         registry[namespace] = class_
 
     def unregister(self, namespace, model=None):
-        registry = (
-            self._model_registry.setdefault(model, {})
-            if model is not None
-            else self._global_registry
-        )
+        registry = self._model_registry.setdefault(model, {}) if model is not None else self._global_registry
         if namespace not in registry:
             raise NamespaceMissing("Namespace %r is not registered yet." % namespace)
 

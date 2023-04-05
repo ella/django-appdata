@@ -7,9 +7,7 @@ from .models import Article, Author
 
 class AuthorInline(AppDataTabularInline):
     model = Author
-    declared_fieldsets = [
-        ("Personal", {"fields": [("personal.first_name", "personal.last_name")]})
-    ]
+    declared_fieldsets = [("Personal", {"fields": [("personal.first_name", "personal.last_name")]})]
 
 
 class ArticleModelAdmin(AppDataModelAdmin):

@@ -35,7 +35,7 @@ class TestMultiForm(AppDataTestCase):
         app_registry.register("myapp2", AppDataContainer.from_form(self.MyForm2))
 
     def test_multi_form_can_work_with_formsets(self):
-        FormSet = multiformset_factory(Article, form_opts={"myapp": {}}, exclude=())
+        FormSet = multiformset_factory(Article, form_opts={"myapp": {}}, exclude=())  # noqa: N806
         data = {
             "fs-TOTAL_FORMS": "1",
             "fs-INITIAL_FORMS": "0",
@@ -61,9 +61,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_multi_form_saves_all_the_forms(self):
-        MF = multiform_factory(
-            Article, form_opts={"myapp": {}, "myapp2": {}}, exclude=()
-        )
+        MF = multiform_factory(Article, form_opts={"myapp": {}, "myapp2": {}}, exclude=())  # noqa: N806
         data = {
             "myapp-title": "First",
             "myapp-publish_from": "2010-11-12",
@@ -87,7 +85,7 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_form_can_be_added_to_parent(self):
-        MF = multiform_factory(Article, multiform=self.MyMultiForm, exclude=())
+        MF = multiform_factory(Article, multiform=self.MyMultiForm, exclude=())  # noqa: N806
         self.MyMultiForm.add_form("myapp", {})
         data = {
             "myapp-title": "First",
@@ -104,7 +102,7 @@ class TestMultiForm(AppDataTestCase):
                     "publish_to": None,
                     "related_article": None,
                     "title": "First",
-                }
+                },
             },
             art.app_data,
         )
@@ -127,7 +125,7 @@ class TestMultiForm(AppDataTestCase):
                     "publish_to": None,
                     "related_article": None,
                     "title": "First",
-                }
+                },
             },
             art.app_data,
         )
@@ -143,9 +141,7 @@ class TestMultiForm(AppDataTestCase):
         self.assertEqual({}, MultiForm.app_form_opts)
 
     def test_form_can_be_removed(self):
-        MF = multiform_factory(
-            Article, form_opts={"myapp": {}}, exclude=()
-        )  # noqa: N806
+        MF = multiform_factory(Article, form_opts={"myapp": {}}, exclude=())  # noqa: N806
         MF.remove_form("myapp")
         data = {
             "myapp-title": "First",
@@ -163,21 +159,17 @@ class TestAppDataForms(AppDataTestCase):
         title = forms.CharField(max_length=100)
         publish_from = forms.DateField()
         publish_to = forms.DateField(required=False)
-        related_article = ModelChoiceField(
-            queryset=Article.objects.all(), required=False
-        )
+        related_article = ModelChoiceField(queryset=Article.objects.all(), required=False)
 
     class MyOtherForm(AppDataForm):
-        categories = ListModelMultipleChoiceField(
-            Category.objects.all(), required=False
-        )
+        categories = ListModelMultipleChoiceField(Category.objects.all(), required=False)
 
     def setUp(self):
         super().setUp()
         MyAppContainer = AppDataContainer.from_form(self.MyForm)  # noqa: N806
         app_registry.register("myapp", MyAppContainer)
         self.data = {"title": "First!", "publish_from": "2010-10-1"}
-        MyOtherContainer = AppDataContainer.from_form(self.MyOtherForm)
+        MyOtherContainer = AppDataContainer.from_form(self.MyOtherForm)  # noqa: N806
         app_registry.register("myotherapp", MyOtherContainer)
 
     def test_empty_list_model_multiple_choice_field(self):

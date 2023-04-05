@@ -8,9 +8,7 @@ from django.core.management import execute_from_command_line
 
 # fix PYTHONPATH and DJANGO_SETTINGS for us
 # django settings module
-DJANGO_SETTINGS_MODULE = "{}.{}".format(
-    split(abspath(dirname(__file__)))[1], "settings"
-)
+DJANGO_SETTINGS_MODULE = "{}.{}".format(split(abspath(dirname(__file__)))[1], "settings")
 # pythonpath dirs
 PYTHONPATH = [
     abspath(join(dirname(__file__), pardir, pardir)),

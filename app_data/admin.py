@@ -34,11 +34,7 @@ class AppDataAdminMixin:
         else:
             exclude = list(self.exclude)
         exclude.extend(self.get_readonly_fields(request, obj))
-        if (
-            self.exclude is None
-            and hasattr(self.form, "_meta")
-            and self.form._meta.exclude
-        ):
+        if self.exclude is None and hasattr(self.form, "_meta") and self.form._meta.exclude:
             # Take the custom ModelForm's Meta.exclude into account only if the
             # ModelAdmin doesn't define its own.
             exclude.extend(self.form._meta.exclude)
@@ -86,9 +82,7 @@ class AppDataAdminMixin:
 
         if hasattr(forms, "ALL_FIELDS"):
             # Django 1.7
-            if defaults["fields"] is None and not modelform_defines_fields(
-                defaults["form"]
-            ):
+            if defaults["fields"] is None and not modelform_defines_fields(defaults["form"]):
                 defaults["fields"] = forms.ALL_FIELDS
 
         return defaults
@@ -102,9 +96,7 @@ class AppDataModelAdmin(AppDataAdminMixin, ModelAdmin):
         """
         if self.multiform is None:
             return super().get_form(request, obj=obj, **kwargs)
-        return multiform_factory(
-            self.model, **self._get_form_factory_opts(request, obj, **kwargs)
-        )
+        return multiform_factory(self.model, **self._get_form_factory_opts(request, obj, **kwargs))
 
 
 class AppDataInlineModelAdmin(AppDataAdminMixin, InlineModelAdmin):

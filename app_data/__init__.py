@@ -1,4 +1,4 @@
-from .containers import AppDataContainer
-from .fields import AppDataField, ListModelMultipleChoiceField
-from .forms import AppDataForm, MultiForm, multiform_factory
-from .registry import NamespaceRegistry, app_registry
+from .containers import AppDataContainer  # noqa: F401
+from .fields import AppDataField, ListModelMultipleChoiceField  # noqa: F401
+from .forms import AppDataForm, MultiForm, multiform_factory  # noqa: F401
+from .registry import NamespaceRegistry, app_registry  # noqa: F401

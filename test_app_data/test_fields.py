@@ -23,7 +23,7 @@ class TestForms(AppDataTestCase):
         class MyForm(AppDataForm):
             publish_from = forms.DateField()
 
-        MyAppContainer = AppDataContainer.from_form(MyForm)
+        MyAppContainer = AppDataContainer.from_form(MyForm)  # noqa: N806
         app_registry.register("myapp", MyAppContainer)
 
         art = Article()
@@ -33,7 +33,7 @@ class TestForms(AppDataTestCase):
         class MyForm(AppDataForm):
             title = forms.CharField(max_length=25, initial="Hullo!")
 
-        MyAppContainer = AppDataContainer.from_form(MyForm)
+        MyAppContainer = AppDataContainer.from_form(MyForm)  # noqa: N806
         app_registry.register("myapp", MyAppContainer)
 
         art = Article()
@@ -44,7 +44,7 @@ class TestForms(AppDataTestCase):
         class MyForm(AppDataForm):
             title = forms.CharField(max_length=25, initial="Hullo!")
 
-        MyAppContainer = AppDataContainer.from_form(MyForm)
+        MyAppContainer = AppDataContainer.from_form(MyForm)  # noqa: N806
         app_registry.register("myapp", MyAppContainer)
 
         art = Article()
@@ -56,7 +56,7 @@ class TestForms(AppDataTestCase):
             title = forms.CharField(max_length=25, initial="Hullo!")
             description = forms.CharField(max_length=25, required=False)
 
-        MyAppContainer = AppDataContainer.from_form(MyForm)
+        MyAppContainer = AppDataContainer.from_form(MyForm)  # noqa: N806
         app_registry.register("myapp", MyAppContainer)
 
         art = Article()
@@ -72,7 +72,7 @@ class TestSerialization(AppDataTestCase):
     def setUp(self):
         super().setUp()
 
-        MyAppContainer = AppDataContainer.from_form(self.MyForm)
+        MyAppContainer = AppDataContainer.from_form(self.MyForm)  # noqa: N806
         app_registry.register("myapp", MyAppContainer)
         self.article = Article()
         self.article.app_data.myapp.publish_from = date(2012, 8, 26)
@@ -136,16 +136,12 @@ class TestAppDataContainers(AppDataTestCase):
         app_registry.register("dummy", DummyAppDataContainer)
         app_registry.register("dummy", DummyAppDataContainer2, model=Publishable)
         inst = Publishable()
-        self.assertTrue(
-            isinstance(inst.app_data.get("dummy", {}), DummyAppDataContainer2)
-        )
+        self.assertTrue(isinstance(inst.app_data.get("dummy", {}), DummyAppDataContainer2))
 
     def test_get_app_data_returns_registered_class_instance(self):
         app_registry.register("dummy", DummyAppDataContainer)
         inst = Publishable()
-        self.assertTrue(
-            isinstance(inst.app_data.get("dummy", {}), DummyAppDataContainer)
-        )
+        self.assertTrue(isinstance(inst.app_data.get("dummy", {}), DummyAppDataContainer))
 
     def test_existing_values_get_wrapped_in_proper_class(self):
         app_registry.register("dummy", DummyAppDataContainer)

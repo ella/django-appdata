@@ -56,6 +56,4 @@ class AlternateRegistryAppForm(AppDataForm):
 app_registry.register("publish", AppDataContainer.from_form(PublishAppForm))
 app_registry.register("rss", AppDataContainer.from_form(RSSAppForm))
 app_registry.register("personal", AppDataContainer.from_form(PersonalAppForm))
-AlternateRegistryModel.alternate_registry.register(
-    "alternate", AppDataContainer.from_form(AlternateRegistryAppForm)
-)
+AlternateRegistryModel.alternate_registry.register("alternate", AppDataContainer.from_form(AlternateRegistryAppForm))
