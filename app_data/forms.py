@@ -240,7 +240,7 @@ class MultiForm(metaclass=MultiFormMetaclass):
         if not hasattr(self, "_changed_data"):
             self._changed_data = cd = self.model_form.changed_data[:]
             for label, form in self.app_forms.items():
-                cd.extend((lambda n: "{}.{}".format(label, n), form.changed_data))  # noqa: B023
+                cd.extend(map(lambda n: "{}.{}".format(label, n), form.changed_data))  # noqa: B023, C417
         return self._changed_data
 
     @property
