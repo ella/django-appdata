@@ -12,7 +12,6 @@ f.close()
 
 install_requires = ["Django", "six"]
 test_requires = [
-    "nose",
     "coverage",
 ]
 
@@ -31,21 +30,18 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: Django",
-        "Framework :: Django :: 1.11",
-        "Framework :: Django :: 2.2",
-        "Framework :: Django :: 3.0",
-        "Framework :: Django :: 3.1",
+        "Framework :: Django :: 3.2",
+        "Framework :: Django :: 4.0",
+        "Framework :: Django :: 4.1",
+        "Framework :: Django :: 4.2",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,
-    test_suite="test_app_data.run_tests.run_all",
+    test_suite="test_app_data.runtests.run_tests",
     tests_require=test_requires,
 )

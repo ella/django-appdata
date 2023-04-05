@@ -6,6 +6,7 @@ repos:
     rev: v4.4.0
     hooks:
       - id: trailing-whitespace
+        exclude: "setup.cfg"
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
@@ -16,12 +17,12 @@ repos:
       - id: fix-encoding-pragma
         args:
           - --remove
-  - repo: https://github.com/timothycrosley/isort
+  - repo: https://github.com/PyCQA/isort
     rev: "5.12.0"
     hooks:
       - id: isort
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 23.3.0
     hooks:
       - id: black
   - repo: https://github.com/PyCQA/flake8
@@ -45,12 +46,6 @@ repos:
       - id: pyupgrade
         args:
           - --py3-plus
-  - repo: https://github.com/adamchainz/django-upgrade
-    rev: "1.12.0"
-    hooks:
-      - id: django-upgrade
-        args: [--target-version, "3.2"]
-
 ci:
   skip:
     - towncrier

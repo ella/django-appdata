@@ -3,8 +3,6 @@ from datetime import date
 from django import forms
 from django.forms.models import ModelChoiceField, modelform_factory
 
-from nose import tools
-
 from app_data.containers import AppDataContainer, AppDataForm
 from app_data.fields import ListModelMultipleChoiceField
 from app_data.forms import MultiForm, multiform_factory, multiformset_factory
@@ -23,7 +21,8 @@ class TestMultiForm(AppDataTestCase):
         publish_from = forms.DateField()
         publish_to = forms.DateField(required=False)
         related_article = ModelChoiceField(
-            queryset=Article.objects.all(), required=False
+            queryset=Article.objects.all(),
+            required=False,
         )
 
     class MyForm2(AppDataForm):
@@ -31,7 +30,7 @@ class TestMultiForm(AppDataTestCase):
 
     def setUp(self):
         super().setUp()
-        MyAppContainer = AppDataContainer.from_form(self.MyForm)
+        MyAppContainer = AppDataContainer.from_form(self.MyForm)  # noqa: N806
         app_registry.register("myapp", MyAppContainer)
         app_registry.register("myapp2", AppDataContainer.from_form(self.MyForm2))
 
@@ -45,11 +44,11 @@ class TestMultiForm(AppDataTestCase):
         }
         formset = FormSet(data, prefix="fs")
 
-        tools.assert_true(formset.is_valid())
+        self.assertTrue(formset.is_valid())
         formset.save()
-        tools.assert_equals(1, Article.objects.count())
+        self.assertEqual(1, Article.objects.count())
         art = Article.objects.all()[0]
-        tools.assert_equals(
+        self.assertEqual(
             {
                 "myapp": {
                     "publish_from": "2010-11-12",
@@ -71,10 +70,10 @@ class TestMultiForm(AppDataTestCase):
             "myapp2-foo": "Second",
         }
         form = MF(data)
-        tools.assert_true(form.is_valid())
-        tools.assert_equals({}, form.errors)
+        self.assertTrue(form.is_valid())
+        self.assertEqual({}, form.errors)
         art = form.save()
-        tools.assert_equals(
+        self.assertEqual(
             {
                 "myapp": {
                     "publish_from": "2010-11-12",
@@ -95,10 +94,10 @@ class TestMultiForm(AppDataTestCase):
             "myapp-publish_from": "2010-11-12",
         }
         form = MF(data)
-        tools.assert_true(form.is_valid())
-        tools.assert_equals({}, form.errors)
+        self.assertTrue(form.is_valid())
+        self.assertEqual({}, form.errors)
         art = form.save()
-        tools.assert_equals(
+        self.assertEqual(
             {
                 "myapp": {
                     "publish_from": "2010-11-12",
@@ -111,17 +110,17 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_form_can_be_added(self):
-        MF = multiform_factory(Article, exclude=())
+        MF = multiform_factory(Article, exclude=())  # noqa: N806
         MF.add_form("myapp", {})
         data = {
             "myapp-title": "First",
             "myapp-publish_from": "2010-11-12",
         }
         form = MF(data)
-        tools.assert_true(form.is_valid())
-        tools.assert_equals({}, form.errors)
+        self.assertTrue(form.is_valid())
+        self.assertEqual({}, form.errors)
         art = form.save()
-        tools.assert_equals(
+        self.assertEqual(
             {
                 "myapp": {
                     "publish_from": "2010-11-12",
@@ -134,27 +133,29 @@ class TestMultiForm(AppDataTestCase):
         )
 
     def test_added_form_doesnt_appear_on_parent(self):
-        ArticleModelForm = modelform_factory(Article, exclude=())
+        ArticleModelForm = modelform_factory(Article, exclude=())  # noqa: N806
 
         class MF(MultiForm):
             ModelForm = ArticleModelForm
 
         MF.add_form("myapp", {})
 
-        tools.assert_equals({}, MultiForm.app_form_opts)
+        self.assertEqual({}, MultiForm.app_form_opts)
 
     def test_form_can_be_removed(self):
-        MF = multiform_factory(Article, form_opts={"myapp": {}}, exclude=())
+        MF = multiform_factory(
+            Article, form_opts={"myapp": {}}, exclude=()
+        )  # noqa: N806
         MF.remove_form("myapp")
         data = {
             "myapp-title": "First",
             "myapp-publish_from": "2010-11-12",
         }
         form = MF(data)
-        tools.assert_true(form.is_valid())
-        tools.assert_equals({}, form.errors)
+        self.assertTrue(form.is_valid())
+        self.assertEqual({}, form.errors)
         art = form.save()
-        tools.assert_equals({}, art.app_data)
+        self.assertEqual({}, art.app_data)
 
 
 class TestAppDataForms(AppDataTestCase):
@@ -173,7 +174,7 @@ class TestAppDataForms(AppDataTestCase):
 
     def setUp(self):
         super().setUp()
-        MyAppContainer = AppDataContainer.from_form(self.MyForm)
+        MyAppContainer = AppDataContainer.from_form(self.MyForm)  # noqa: N806
         app_registry.register("myapp", MyAppContainer)
         self.data = {"title": "First!", "publish_from": "2010-10-1"}
         MyOtherContainer = AppDataContainer.from_form(self.MyOtherForm)
@@ -181,8 +182,8 @@ class TestAppDataForms(AppDataTestCase):
 
     def test_empty_list_model_multiple_choice_field(self):
         article = Article()
-        tools.assert_true(isinstance(article.app_data.myotherapp.categories, list))
-        tools.assert_equals([], article.app_data.myotherapp.categories)
+        self.assertTrue(isinstance(article.app_data.myotherapp.categories, list))
+        self.assertEqual([], article.app_data.myotherapp.categories)
 
     def test_list_model_multiple_choice_field(self):
         c1, c2 = Category.objects.create(), Category.objects.create()
@@ -190,18 +191,18 @@ class TestAppDataForms(AppDataTestCase):
         article = Article()
         data = {"categories": [str(c1.pk), str(c2.pk)]}
         form = article.app_data.myotherapp.get_form(data)
-        tools.assert_true(form.is_valid())
+        self.assertTrue(form.is_valid())
         form.save()
         article.save()
         article = Article.objects.get(pk=article.pk)
-        tools.assert_true(isinstance(article.app_data.myotherapp.categories, list))
-        tools.assert_equals([c1, c2], article.app_data.myotherapp.categories)
+        self.assertTrue(isinstance(article.app_data.myotherapp.categories, list))
+        self.assertEqual([c1, c2], article.app_data.myotherapp.categories)
 
     def test_instance_is_accessible_to_the_form(self):
         art = Article()
         form = art.app_data.myapp.get_form(self.data)
 
-        tools.assert_true(art is form.instance)
+        self.assertTrue(art is form.instance)
 
     def test_foreign_keys_can_be_used(self):
         rel = Article.objects.create()
@@ -209,28 +210,26 @@ class TestAppDataForms(AppDataTestCase):
 
         article = Article()
         form = article.app_data.myapp.get_form(self.data)
-        tools.assert_true(form.is_valid())
+        self.assertTrue(form.is_valid())
         form.save()
         article.save()
         article = Article.objects.get(pk=article.pk)
-        tools.assert_equals(rel, article.app_data.myapp.related_article)
+        self.assertEqual(rel, article.app_data.myapp.related_article)
 
     def test_current_app_data_will_be_used_as_initial(self):
         article = Article()
         article.app_data = {"myapp": {"title": "Hello", "publish_from": "2012-10-10"}}
         form = article.app_data.myapp.get_form()
-        tools.assert_equals(
-            {"title": "Hello", "publish_from": "2012-10-10"}, form.initial
-        )
+        self.assertEqual({"title": "Hello", "publish_from": "2012-10-10"}, form.initial)
 
     def test_form_save_alters_data_on_model(self):
         article = Article()
         form = article.app_data.myapp.get_form(self.data)
-        tools.assert_true(form.is_valid())
+        self.assertTrue(form.is_valid())
         form.save()
         article.save()
         article = Article.objects.get(pk=article.pk)
-        tools.assert_equals(date(2010, 10, 1), article.app_data.myapp.publish_from)
+        self.assertEqual(date(2010, 10, 1), article.app_data.myapp.publish_from)
 
     def test_form_with_limitted_fields_only_updates_those(self):
         article = Article()
@@ -240,10 +239,10 @@ class TestAppDataForms(AppDataTestCase):
                 "title",
             ],
         )
-        tools.assert_true(form.is_valid())
+        self.assertTrue(form.is_valid())
         form.save()
 
         article.save()
         article = Article.objects.get(pk=article.pk)
-        tools.assert_equals("First!", article.app_data.myapp._data["title"])
-        tools.assert_false("publish_from" in article.app_data.myapp._data)
+        self.assertEqual("First!", article.app_data.myapp._data["title"])
+        self.assertFalse("publish_from" in article.app_data.myapp._data)

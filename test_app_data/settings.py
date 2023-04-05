@@ -24,12 +24,7 @@ TEMPLATES = [
 
 SECRET_KEY = "very-secret"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "/tmp/app_data.db",
-    }
-}
+DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}}
 
 MIDDLEWARE = (
     "django.middleware.common.CommonMiddleware",
