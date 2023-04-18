@@ -1,1 +1,2 @@
-coverage>=7
+coverage
+coveralls>=2
