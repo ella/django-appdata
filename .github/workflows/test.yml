@@ -43,12 +43,6 @@ jobs:
       run: |
         tox -e$TOX_ENV
         .tox/$TOX_ENV/bin/coverage xml
-    - uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        flags: unittests
-        files: ./coverage.xml
-        fail_ci_if_error: false
     services:
       redis:
         image: redis
