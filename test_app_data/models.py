@@ -1,13 +1,7 @@
 from django import forms
 from django.db import models
 
-from app_data import (
-    AppDataContainer,
-    AppDataField,
-    AppDataForm,
-    NamespaceRegistry,
-    app_registry,
-)
+from app_data import AppDataContainer, AppDataField, AppDataForm, NamespaceRegistry, app_registry
 
 
 class Category(models.Model):

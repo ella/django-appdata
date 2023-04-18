@@ -3,12 +3,7 @@ from operator import methodcaller
 
 from django.forms.forms import NON_FIELD_ERRORS, Form
 from django.forms.formsets import formset_factory
-from django.forms.models import (
-    BaseInlineFormSet,
-    BaseModelFormSet,
-    _get_foreign_key,
-    modelform_factory,
-)
+from django.forms.models import BaseInlineFormSet, BaseModelFormSet, _get_foreign_key, modelform_factory
 from django.forms.utils import pretty_name
 from django.utils.safestring import mark_safe
 

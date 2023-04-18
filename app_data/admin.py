@@ -5,12 +5,7 @@ from django.contrib.admin.options import InlineModelAdmin, ModelAdmin
 from django.contrib.admin.utils import flatten_fieldsets
 from django.forms.models import modelform_defines_fields
 
-from app_data.forms import (
-    AppDataBaseInlineFormSet,
-    MultiForm,
-    multiform_factory,
-    multiinlineformset_factory,
-)
+from app_data.forms import AppDataBaseInlineFormSet, MultiForm, multiform_factory, multiinlineformset_factory
 
 
 class AppDataAdminMixin:
