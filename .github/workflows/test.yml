@@ -43,6 +43,7 @@ jobs:
       run: |
         tox -e$TOX_ENV
         .tox/$TOX_ENV/bin/coverage xml
+        .tox/$TOX_ENV/bin/coveralls
     services:
       redis:
         image: redis
