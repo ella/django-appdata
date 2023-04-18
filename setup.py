@@ -1,14 +1,6 @@
-from os.path import dirname, join
+from setuptools import find_packages, setup
 
-from setuptools import setup
-
-VERSION = (0, 3, 2)
-__version__ = VERSION
-__versionstr__ = ".".join(map(str, VERSION))
-
-f = open(join(dirname(__file__), "README.rst"))
-long_description = f.read().strip()
-f.close()
+from app_data import __version__
 
 install_requires = ["Django", "six"]
 test_requires = [
@@ -19,12 +11,12 @@ setup(
     name="django-appdata",
     description="Extendable field that enables Django apps to store their data on your models.",
     url="https://github.com/ella/django-appdata/",
-    long_description=long_description,
-    version=__versionstr__,
+    long_description=open("README.rst").read(),
+    version=__version__,
     author="Ella Development Team",
     author_email="dev@ellaproject.cz",
     license="BSD",
-    packages=["app_data"],
+    packages=find_packages(exclude=["test_app_data"]),
     zip_safe=False,
     include_package_data=True,
     classifiers=[

@@ -1,3 +1,5 @@
+__version__ = "0.4.0.dev1"
+
 from .containers import AppDataContainer  # noqa: F401
 from .fields import AppDataField, ListModelMultipleChoiceField  # noqa: F401
 from .forms import AppDataForm, MultiForm, multiform_factory  # noqa: F401
