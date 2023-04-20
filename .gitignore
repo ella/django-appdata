@@ -9,3 +9,4 @@ dist
 .eggs
 .idea
 .tox
+.ruff_cache

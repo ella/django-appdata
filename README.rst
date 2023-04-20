@@ -1,7 +1,7 @@
 Django AppData
 ##############
 
-Extandable field and related tools that enable Django apps to extend your
+Extendable field and related tools that enable Django apps to extend your
 reusable app.
 
 Motivation
@@ -19,15 +19,15 @@ to provide a standardised approach to extending existing apps.
 Supported versions
 ******************
 
-Python: 2.7, 3.5, 3.6, 3.7, 3.8
-Django: 1.11, 2.2, 3.0, 3.1
+Python: 3.9, 3.10, 3.11
+Django: 3.2, 4.2
 
 Upgrading to 0.3
 ****************
 
 If you are upgrading from a 0.2.x version, please note the following incompatible changes in 0.3
 
-* Dropped Django < 1.11 and Python 3.4 compatibility
+* Dropped Django < 3.2 and Python < 3.9 compatibility
 
 
 Extending Models
@@ -180,4 +180,3 @@ Build status
   .. image:: https://secure.travis-ci.org/ella/django-appdata.png?branch=master
      :alt: Travis CI - Distributed build platform for the open source community
      :target: http://travis-ci.org/#!/ella/django-appdata
-

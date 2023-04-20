@@ -1,16 +1,14 @@
 import json
 
-import six
-
 from django import forms
 from django.db.models import TextField
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
-from .registry import app_registry
 from .containers import AppDataContainerFactory
+from .registry import app_registry
 
 
-class AppDataDescriptor(object):
+class AppDataDescriptor:
     """Ensure the user attribute is accessible via the profile"""
 
     def __init__(self, field):
@@ -22,7 +20,7 @@ class AppDataDescriptor(object):
 
         value = instance.__dict__[self.field.name]
 
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             value = json.loads(value)
 
         if isinstance(value, dict) and not isinstance(value, AppDataContainerFactory):
@@ -44,13 +42,13 @@ class AppDataDescriptor(object):
 
 class AppDataField(TextField):
     def __init__(self, *args, **kwargs):
-        self.app_registry = kwargs.pop('app_registry', app_registry)
-        kwargs.setdefault('default', '{}')
-        kwargs.setdefault('editable', False)
-        super(AppDataField, self).__init__(*args, **kwargs)
+        self.app_registry = kwargs.pop("app_registry", app_registry)
+        kwargs.setdefault("default", "{}")
+        kwargs.setdefault("editable", False)
+        super().__init__(*args, **kwargs)
 
     def contribute_to_class(self, cls, name, **kwargs):
-        super(AppDataField, self).contribute_to_class(cls, name, **kwargs)
+        super().contribute_to_class(cls, name, **kwargs)
         setattr(cls, name, AppDataDescriptor(self))
 
     def get_db_prep_value(self, value, connection, prepared=False):
@@ -62,7 +60,7 @@ class AppDataField(TextField):
         return value
 
     def validate(self, value, model_instance):
-        super(AppDataField, self).validate(value, model_instance)
+        super().validate(value, model_instance)
         value.validate(model_instance)
 
     def value_to_string(self, obj):
@@ -73,7 +71,7 @@ class AppDataField(TextField):
         if isinstance(value, dict):
             value = json.dumps(value)
 
-        return smart_text(value)
+        return smart_str(value)
 
 
 class ListModelMultipleChoiceField(forms.ModelMultipleChoiceField):
@@ -83,6 +81,7 @@ class ListModelMultipleChoiceField(forms.ModelMultipleChoiceField):
     Use this on AppDataForms rather than a ModelMultipleChoiceField to make it
     possible to manipulate the app data field like a list.
     """
+
     def clean(self, value):
-        value = super(ListModelMultipleChoiceField, self).clean(value)
+        value = super().clean(value)
         return list(value)

@@ -1,7 +1,7 @@
 from django import forms
 from django.db import models
 
-from app_data import AppDataField, AppDataContainer, AppDataForm, NamespaceRegistry, app_registry
+from app_data import AppDataContainer, AppDataField, AppDataForm, NamespaceRegistry, app_registry
 
 
 class Category(models.Model):
@@ -47,8 +47,7 @@ class AlternateRegistryAppForm(AppDataForm):
     alternate_field = forms.CharField(max_length=20, required=False)
 
 
-app_registry.register('publish', AppDataContainer.from_form(PublishAppForm))
-app_registry.register('rss', AppDataContainer.from_form(RSSAppForm))
-app_registry.register('personal', AppDataContainer.from_form(PersonalAppForm))
-AlternateRegistryModel.alternate_registry.register(
-    'alternate', AppDataContainer.from_form(AlternateRegistryAppForm))
+app_registry.register("publish", AppDataContainer.from_form(PublishAppForm))
+app_registry.register("rss", AppDataContainer.from_form(RSSAppForm))
+app_registry.register("personal", AppDataContainer.from_form(PersonalAppForm))
+AlternateRegistryModel.alternate_registry.register("alternate", AppDataContainer.from_form(AlternateRegistryAppForm))

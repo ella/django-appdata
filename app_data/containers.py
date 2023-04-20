@@ -1,38 +1,36 @@
 from copy import copy
 
-import six
-
 from django.core.exceptions import ValidationError
 
-from .registry import app_registry
 from .forms import AppDataForm
+from .registry import app_registry
 
 
 class AppDataContainerFactory(dict):
     def __init__(self, model_instance, *args, **kwargs):
         self._model = model_instance.__class__
         self._instance = model_instance
-        self._app_registry = kwargs.pop('app_registry', app_registry)
-        super(AppDataContainerFactory, self).__init__(*args, **kwargs)
+        self._app_registry = kwargs.pop("app_registry", app_registry)
+        super().__init__(*args, **kwargs)
 
     def __repr__(self):
-        return '<AppDataContainerFactory: %s>' % super(AppDataContainerFactory, self).__repr__()
+        return "<AppDataContainerFactory: %s>" % super().__repr__()
 
     def __setattr__(self, name, value):
-        if name.startswith('_') or self._app_registry.get_class(name, self._model) is None:
-            super(AppDataContainerFactory, self).__setattr__(name, value)
+        if name.startswith("_") or self._app_registry.get_class(name, self._model) is None:
+            super().__setattr__(name, value)
         else:
             self[name] = copy(value)
 
     def __getattr__(self, name):
-        if name.startswith('_') or self._app_registry.get_class(name, self._model) is None:
-            raise AttributeError('No Container registered under %s for class %s' % (name, self._model.__name__))
+        if name.startswith("_") or self._app_registry.get_class(name, self._model) is None:
+            raise AttributeError("No Container registered under {} for class {}".format(name, self._model.__name__))
         return self[name]
 
     def __getitem__(self, name):
         class_ = self._app_registry.get_class(name, self._model)
         try:
-            val = super(AppDataContainerFactory, self).__getitem__(name)
+            val = super().__getitem__(name)
         except KeyError:
             if class_ is None:
                 raise
@@ -46,12 +44,12 @@ class AppDataContainerFactory(dict):
         return val
 
     def __reduce__(self):
-        return (dict, (self.serialize(), ))
+        return (dict, (self.serialize(),))
 
     def validate(self, model_instance):
         errors = {}
-        for key, value in six.iteritems(self):
-            if hasattr(value, 'validate') and getattr(value, 'accessed', True):
+        for key, value in self.items():
+            if hasattr(value, "validate") and getattr(value, "accessed", True):
                 try:
                     value.validate(self, model_instance)
                 except ValidationError as e:
@@ -60,10 +58,10 @@ class AppDataContainerFactory(dict):
             raise ValidationError(errors)
 
     def serialize(self):
-        for key, value in six.iteritems(self):
+        for key, value in self.items():
             if isinstance(value, AppDataContainer):
                 value = value.serialize() if value.accessed else value._data
-                super(AppDataContainerFactory, self).__setitem__(key, value)
+                super().__setitem__(key, value)
         # return a copy so that it's a fresh dict, not AppDataContainerFactory
         return self.copy()
 
@@ -84,12 +82,16 @@ class AppDataContainerFactory(dict):
 INITIAL = object()
 
 
-class AppDataContainer(object):
+class AppDataContainer:
     form_class = AppDataForm
 
     @classmethod
     def from_form(cls, form_class):
-        return type('%sAppDataContainer' % form_class.__name__, (cls, ), {'fields': {}, 'form_class': form_class})
+        return type(
+            "%sAppDataContainer" % form_class.__name__,
+            (cls,),
+            {"fields": {}, "form_class": form_class},
+        )
 
     @property
     def accessed(self):
@@ -103,7 +105,7 @@ class AppDataContainer(object):
         self._instance = model_instance
 
     def __repr__(self):
-        return '<%s: %r>' % (self.__class__.__name__, self.serialize())
+        return "<{}: {!r}>".format(self.__class__.__name__, self.serialize())
 
     def __eq__(self, other):
         if isinstance(other, AppDataContainer):
@@ -115,7 +117,7 @@ class AppDataContainer(object):
     @property
     def _form(self):
         """Form instance used to clean/(de)serialize field values."""
-        if not hasattr(self, '_form_instance'):
+        if not hasattr(self, "_form_instance"):
             self._form_instance = self.get_form()
         return self._form_instance
 
@@ -131,8 +133,8 @@ class AppDataContainer(object):
 
     def __setattr__(self, name, value):
         """Provide access to fields as attributes."""
-        if name.startswith('_'):
-            super(AppDataContainer, self).__setattr__(name, value)
+        if name.startswith("_"):
+            super().__setattr__(name, value)
         else:
             self.__setitem__(name, value)
 
@@ -156,7 +158,7 @@ class AppDataContainer(object):
 
     def __getattr__(self, name):
         """Provide access to fields as attributes."""
-        if name.startswith('_'):
+        if name.startswith("_"):
             raise AttributeError(name)
         try:
             return self.__getitem__(name)
@@ -179,7 +181,7 @@ class AppDataContainer(object):
             return default
 
     def update(self, data):
-        for k, v in six.iteritems(data):
+        for k, v in data.items():
             self[k] = v
 
     def validate(self, app_data, model_instance):
@@ -190,7 +192,7 @@ class AppDataContainer(object):
 
     def serialize(self):
         """Go through attribute cache and use ._form to serialze those values into ._data."""
-        for name, value in six.iteritems(self._attr_cache):
+        for name, value in self._attr_cache.items():
             f = self._form.fields[name]
             value = f.prepare_value(value)
             # Widget.format_value in 1.11 has a different semantic than Widget._format_value in previous versions
@@ -198,10 +200,10 @@ class AppDataContainer(object):
             # To handle this we pick the formatted value *only if* both formatted and original values evaluates to true
             # Choices fields must not be formatted because we need the python value, not the formatted one
             new_value = None
-            if not hasattr(f, 'choices'):
-                if hasattr(f.widget, 'format_value'):
+            if not hasattr(f, "choices"):
+                if hasattr(f.widget, "format_value"):
                     new_value = f.widget.format_value(value)
-                elif hasattr(f.widget, '_format_value'):
+                elif hasattr(f.widget, "_format_value"):
                     new_value = f.widget._format_value(value)
             if value and new_value:
                 value = new_value

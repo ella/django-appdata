@@ -1,4 +1,4 @@
-class NamespaceConflict(Exception):
+class NamespaceConflict(Exception):  # noqa: N818
     pass
 
 
@@ -6,10 +6,11 @@ class NamespaceMissing(KeyError):
     pass
 
 
-class NamespaceRegistry(object):
+class NamespaceRegistry:
     """
     Global registry of app_specific storage classes in app_data field
     """
+
     def __init__(self, default_class=None):
         self.default_class = default_class
         self._reset()
@@ -40,22 +41,17 @@ class NamespaceRegistry(object):
         registry = self._model_registry.setdefault(model, {}) if model is not None else self._global_registry
         if namespace in registry and not override:
             raise NamespaceConflict(
-                'Namespace %r already assigned to class %r%s.' % (
-                    namespace,
-                    registry[namespace],
-                    '' if model is None else ' for model %s' % model._meta
-                )
+                "Namespace %r already assigned to class %r%s."
+                % (namespace, registry[namespace], "" if model is None else " for model %s" % model._meta),
             )
         registry[namespace] = class_
 
     def unregister(self, namespace, model=None):
         registry = self._model_registry.setdefault(model, {}) if model is not None else self._global_registry
         if namespace not in registry:
-            raise NamespaceMissing(
-                'Namespace %r is not registered yet.' % namespace)
+            raise NamespaceMissing("Namespace %r is not registered yet." % namespace)
 
         del registry[namespace]
 
+
 app_registry = NamespaceRegistry()
-
-
