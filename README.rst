@@ -22,10 +22,10 @@ Supported versions
 Python: 3.9, 3.10, 3.11
 Django: 3.2, 4.2
 
-Upgrading to 0.3
+Upgrading to 0.4
 ****************
 
-If you are upgrading from a 0.2.x version, please note the following incompatible changes in 0.3
+If you are upgrading from a 0.3.x version, please note the following incompatible changes in 0.4
 
 * Dropped Django < 3.2 and Python < 3.9 compatibility
 

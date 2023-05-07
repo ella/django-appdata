@@ -1,4 +1,4 @@
-__version__ = "0.4.0.dev1"
+__version__ = "0.4.0"
 
 from .containers import AppDataContainer  # noqa: F401
 from .fields import AppDataField, ListModelMultipleChoiceField  # noqa: F401
